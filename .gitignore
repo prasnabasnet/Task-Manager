@@ -1,0 +1,24 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+*.sqlite3
+media/
+staticfiles/
+
+# Local configuration secrets
+.env
+
+# uv files
+.uv/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
