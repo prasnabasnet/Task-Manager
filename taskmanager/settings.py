@@ -40,12 +40,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
-    'users',
-    'projects',
-    'tasks',
-    'comments',
+    'apps.users',
+    'apps.projects',
+    'apps.tasks',
+    'apps.comments',
 ]
-
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
 
