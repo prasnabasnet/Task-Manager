@@ -40,13 +40,27 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
-    'tasks',
-    'accounts',
-    'comments',
+    'users',
     'projects',
-
-
+    'tasks',
+    'comments',
 ]
+
+# Custom User Model
+AUTH_USER_MODEL = 'users.User'
+
+# DRF
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+
+# Default Auto Field
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -140,4 +154,4 @@ REST_FRAMEWORK = {
     ],
 }
 
-AUTH_USER_MODEL = 'accounts.User' //
+AUTH_USER_MODEL = 'users.User'
