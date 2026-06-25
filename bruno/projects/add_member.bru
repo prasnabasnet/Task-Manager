@@ -1,0 +1,21 @@
+meta {
+  name: Add Project Member
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base_url}}/projects/1/members/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "user_id": 2
+  }
+}
