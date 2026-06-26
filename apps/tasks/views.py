@@ -28,7 +28,7 @@ class TaskListCreateView(generics.ListCreateAPIView):
             qs = qs.filter(assignee_id=assignee)
 
         return qs.distinct()
-
+ 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
