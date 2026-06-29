@@ -28,7 +28,7 @@ class LoginView(views.APIView):
     permission_classes = [AllowAny]  # Public endpoint
 
     def post(self, request):
-        email = request.data.get('email')
+        email = request.data.get('email') or request.data.get('username')
         password = request.data.get('password')
         if not email or not password:
             return Response(

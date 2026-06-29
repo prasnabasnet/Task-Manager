@@ -1,0 +1,19 @@
+meta {
+  name: List Projects
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/projects/
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Token {{token}}
+}
+
+auth:bearer {
+  token: {{token}}
+}

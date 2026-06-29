@@ -1,0 +1,22 @@
+meta {
+  name: Update Task
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{base_url}}/tasks/1/
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Token {{token}}
+}
+
+body:json {
+  {
+    "status": "IN_PROGRESS",
+    "description": "Updated task description with additional checklist items."
+  }
+}
