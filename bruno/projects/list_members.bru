@@ -5,11 +5,11 @@ meta {
 }
 
 get {
-  url: {{base_url}}/projects/1/members/
+  url: {{base_url}}/projects/2/members/
   body: none
-  auth: bearer
+  auth: none
 }
 
-auth:bearer {
-  token: {{token}}
+headers {
+  Authorization: Token {{token}}
 }
