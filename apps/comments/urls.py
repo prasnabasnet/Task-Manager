@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import TaskCommentListCreateView, CommentDetailView
+from apps.comments.views import TaskCommentListCreateView, CommentDetailView
 
 urlpatterns = [
     path('projects/<int:pid>/tasks/<int:tid>/comments/', TaskCommentListCreateView.as_view(), name='task-comment-list-create'),

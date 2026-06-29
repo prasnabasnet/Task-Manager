@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from apps.users.serializers import UserDetailSerializer
-from .models import Comment
-from .mention_parser import parse_mentions
+from apps.comments.models import Comment
+from apps.comments.mention_parser import parse_mentions
 
 class ReplySerializer(serializers.ModelSerializer):
     author = UserDetailSerializer(read_only=True)

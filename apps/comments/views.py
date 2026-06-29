@@ -5,8 +5,8 @@ from rest_framework.response import Response
 
 from apps.tasks.models import Task
 from apps.projects.models import Project
-from .models import Comment
-from .serializers import CommentSerializer
+from apps.comments.models import Comment
+from apps.comments.serializers import CommentSerializer
 
 
 class IsProjectMemberMixin:
