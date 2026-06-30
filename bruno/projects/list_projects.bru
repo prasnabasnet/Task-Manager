@@ -5,11 +5,15 @@ meta {
 }
 
 get {
-  url: {{base_url}}/projects/
+  url: {{base_url}}/projects/?owner=2
   body: none
-  auth: bearer
+  auth: none
 }
 
-auth:bearer {
-  token: {{token}}
+params:query {
+  owner: 2
+}
+
+headers {
+  Authorization: token 45fe76b868e6bedfbabdfdab7da715b5bf0c55a4
 }
