@@ -28,14 +28,14 @@ class LoginView(views.APIView):
     permission_classes = [AllowAny]  # Public endpoint
 
     def post(self, request):
-        email = request.data.get('email')
+        email = request.data.get('email') or request.data.get('username')
         password = request.data.get('password')
         if not email or not password:
             return Response(
                 {'error': 'Email and password are required.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        user = authenticate(request, username=email, password=password)
+        user = authenticate(request, username=email, password=password)  
         if user is not None:
             token, _ = Token.objects.get_or_create(user=user)
             return Response({

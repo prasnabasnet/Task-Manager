@@ -1,19 +1,15 @@
 meta {
-  name: List Projects
+  name: List Comments
   type: http
   seq: 1
 }
 
 get {
-  url: {{base_url}}/projects/?owner=2
+  url: {{base_url}}/projects/1/tasks/1/comments/
   body: none
   auth: none
 }
 
 headers {
   Authorization: Token {{token}}
-}
-
-auth:bearer {
-  token: {{token}}
 }
