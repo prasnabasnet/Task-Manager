@@ -5,9 +5,13 @@ meta {
 }
 
 post {
-  url: {{base_url}}/projects/1/members/
+  url: {{base_url}}/projects/2/members/
   body: json
   auth: bearer
+}
+
+headers {
+  Authorization: {{token}}
 }
 
 auth:bearer {
@@ -16,6 +20,6 @@ auth:bearer {
 
 body:json {
   {
-    "user_id": 2
+    "user_id": 8
   }
 }
