@@ -1,25 +1,19 @@
-from rest_framework import permissions
+from rest_framework.permissions import BasePermission
 
 
-class IsAdminOrPM(permissions.BasePermission):
-    """Allow access only to Admin or Project Manager roles."""
-
+class IsAdminOrPM(BasePermission):
     def has_permission(self, request, view):
         return request.user.role in ('ADMIN', 'PM')
 
 
-class IsProjectOwnerOrAdmin(permissions.BasePermission):
-    """Allow object-level access only to the project owner or admin."""
-
+class IsProjectOwnerOrAdmin(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.role == 'ADMIN':
             return True
         return obj.owner == request.user
 
 
-class IsProjectMemberOrAdmin(permissions.BasePermission):
-    """Allow access only to project members or admin."""
-
+class IsProjectMemberOrAdmin(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.role == 'ADMIN':
             return True
