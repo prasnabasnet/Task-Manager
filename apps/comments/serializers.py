@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
 from apps.users.serializers import UserDetailSerializer
 from apps.comments.mention_parser import parse_mentions
-from .models import Comment
+from apps.comments.models import Comment
 
 class ReplySerializer(serializers.ModelSerializer):
     author = UserDetailSerializer(read_only=True)
@@ -17,7 +17,6 @@ class ReplySerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    # Inputs for assigning comments to a Project or Task
     target_type = serializers.ChoiceField(choices=['project', 'task'], write_only=True, required=False)
     target_id = serializers.IntegerField(write_only=True, required=False)
     

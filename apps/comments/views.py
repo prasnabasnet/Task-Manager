@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from apps.comments.models import Comment
 from apps.comments.serializers import CommentSerializer
-from .permissions import IsProjectMember, IsCommentAuthorOrAdmin
+from apps.comments.permissions import IsProjectMember, IsCommentAuthorOrAdmin
 
 
 class CommentViewSet(viewsets.ModelViewSet):
