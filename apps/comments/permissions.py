@@ -22,7 +22,13 @@ class IsProjectMember(permissions.BasePermission):
         elif isinstance(obj, Task):
             project = obj.project
         elif isinstance(obj, Comment):
-            project = obj.task.project
+            target = obj.commentable_object
+            if isinstance(target, Project):
+                project = target
+            elif isinstance(target, Task):
+                project = target.project
+            else:
+                return False
         else:
             return False
 

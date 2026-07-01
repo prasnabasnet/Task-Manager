@@ -1,13 +1,19 @@
 meta {
   name: List Comments
   type: http
-  seq: 1
+  seq: 4
 }
 
 get {
-  url: {{base_url}}/projects/1/tasks/1/comments/
+  url: {{base_url}}/comments/
   body: none
   auth: none
+}
+
+params:query {
+  target_type: project
+  target_id: 2
+  ~parent: 1
 }
 
 headers {
