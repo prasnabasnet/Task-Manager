@@ -8,10 +8,8 @@ class Comment(models.Model):
     body = models.TextField()
     mentions = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='mentioned_comments')
     
-    # Self-referencing foreign key for replies (only 1 level deep)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     
-    # Generic ContentType setup (targets Project or Task)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     commentable_object = GenericForeignKey('content_type', 'object_id')
