@@ -1,11 +1,11 @@
 meta {
-  name: Create Root Comment
+  name: Create Comment
   type: http
-  seq: 1
+  seq: 2
 }
 
 post {
-  url: {{base_url}}/comments/
+  url: {{base_url}}/projects/1/tasks/1/comments/
   body: json
   auth: none
 }
@@ -17,7 +17,7 @@ headers {
 body:json {
   {
     "body": "Hey @pm_user, check the token expiry logic.",
-    "target_type": "project",
-    "target_id": 2
+    "parent": null
   }
 }
+​
