@@ -2,8 +2,8 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import generics, permissions
-from .models import Task
-from .serializers import TaskSerializer
+from apps.tasks.models.task import Task
+from apps.tasks.serializers.task import TaskSerializer
 
 
 class TaskListCreateView(generics.ListCreateAPIView):
