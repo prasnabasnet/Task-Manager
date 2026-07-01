@@ -1,7 +1,7 @@
 meta {
-  name: Create Root Comment
+  name: Create Reply Comment
   type: http
-  seq: 1
+  seq: 2
 }
 
 post {
@@ -16,8 +16,7 @@ headers {
 
 body:json {
   {
-    "body": "Hey @pm_user, check the token expiry logic.",
-    "target_type": "project",
-    "target_id": 2
+    "body": "This is a reply to the parent comment.",
+    "parent": 1
   }
 }

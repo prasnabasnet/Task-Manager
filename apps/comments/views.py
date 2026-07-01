@@ -1,13 +1,11 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
+from django.contrib.contenttypes.models import ContentType
 
-from apps.tasks.models import Task
-from apps.projects.models import Project
 from apps.comments.models import Comment
 from apps.comments.serializers import CommentSerializer
-from .permissions import IsProjectMember, IsCommentAuthorOrAdmin, IsAdmin
+from .permissions import IsProjectMember, IsCommentAuthorOrAdmin
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -22,30 +20,57 @@ class CommentViewSet(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
-    def _get_project_and_task(self):
-        project = get_object_or_404(Project, pk=self.kwargs.get('pid'))
-        task = get_object_or_404(Task, pk=self.kwargs.get('tid'), project=project)
-        return project, task
-
     def get_queryset(self):
-        project, task = self._get_project_and_task()
-        
-        # Explicitly trigger object permission check for the project structure on list/create routes
-        # because DRF doesn't call `has_object_permission` automatically for lists.
-        for permission in self.get_permissions():
-            if not permission.has_object_permission(self.request, self, task):
+        queryset = self.queryset
+
+        # For detail views, don't restrict the queryset to the user's authored comments.
+        # This allows permissions (like IsProjectMember and IsCommentAuthorOrAdmin) to check 
+        # project membership and author permissions on the specific object, yielding 403 instead of 404.
+        if self.action in ['retrieve', 'update', 'partial_update', 'destroy']:
+            return queryset
+
+        target_type = self.request.query_params.get('target_type')
+        target_id = self.request.query_params.get('target_id')
+        parent_id = self.request.query_params.get('parent')
+
+        if parent_id:
+            try:
+                parent_comment = Comment.objects.get(id=parent_id)
+            except Comment.DoesNotExist:
+                return queryset.none()
+
+            permission = IsProjectMember()
+            if not permission.has_object_permission(self.request, self, parent_comment):
+                self.permission_denied(self.request)
+            return queryset.filter(parent_id=parent_id)
+
+        if target_type and target_id:
+            app_label = 'projects' if target_type == 'project' else 'tasks'
+            try:
+                ct = ContentType.objects.get(app_label=app_label, model=target_type)
+                target_obj = ct.model_class().objects.get(id=target_id)
+            except Exception:
+                return queryset.none()
+
+            permission = IsProjectMember()
+            if not permission.has_object_permission(self.request, self, target_obj):
                 self.permission_denied(self.request)
 
-        # Return top-level comments only (parent is null) as replies are nested
-        return Comment.objects.filter(task=task, parent__isnull=True)
+            return queryset.filter(content_type=ct, object_id=target_id, parent__isnull=True)
+
+        return queryset.filter(author=self.request.user, parent__isnull=True)
 
     def perform_create(self, serializer):
-        project, task = self._get_project_and_task()
-        
-        # If a parent ID is provided, validate it belongs to the same task
-        parent_id = self.request.data.get('parent')
-        parent = None
-        if parent_id:
-            parent = get_object_or_404(Comment, pk=parent_id, task=task)
+        content_type = serializer.validated_data.get('content_type')
+        target_id = serializer.validated_data.get('target_id')
 
-        serializer.save(task=task, parent=parent, author=self.request.user)
+        target_obj = content_type.model_class().objects.get(id=target_id)
+        permission = IsProjectMember()
+        if not permission.has_object_permission(self.request, self, target_obj):
+            self.permission_denied(self.request)
+
+        serializer.save(
+            author=self.request.user,
+            content_type=content_type,
+            object_id=target_id
+        )
