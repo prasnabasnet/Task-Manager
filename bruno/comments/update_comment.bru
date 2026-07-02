@@ -1,0 +1,21 @@
+meta {
+  name: Update Comment
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{base_url}}/comments/1/
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Token {{token}}
+}
+
+body:json {
+  {
+    "body": "Updated comment content with a mention: @dev_user"
+  }
+}

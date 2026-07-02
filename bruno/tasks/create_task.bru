@@ -1,0 +1,25 @@
+meta {
+  name: Create Task
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/tasks/
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Token {{token}}
+}
+
+body:json {
+  {
+    "project": 1,
+    "title": "Implement Auth System",
+    "description": "Create registration and login views with token auth.",
+    "status": "TODO",
+    "priority": "HIGH"
+  }
+}

@@ -1,0 +1,22 @@
+meta {
+  name: Create Comment
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/projects/1/tasks/1/comments/
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Token {{token}}
+}
+
+body:json {
+  {
+    "body": "Hey @pm_user, check the token expiry logic.",
+    "parent": null
+  }
+}

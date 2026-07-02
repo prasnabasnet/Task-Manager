@@ -1,0 +1,15 @@
+meta {
+  name: List Tasks
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/tasks/
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Token {{token}}
+}
