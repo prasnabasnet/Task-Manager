@@ -3,13 +3,13 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate, get_user_model
-from .serializers import UserRegisterSerializer, UserDetailSerializer
+from apps.users.serializers import UserRegisterSerializer, UserDetailSerializer
 
 User = get_user_model()
 
 
 class RegisterView(generics.CreateAPIView):
-    permission_classes = [AllowAny]  # Public endpoint
+    permission_classes = [AllowAny]  
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
 
@@ -25,7 +25,7 @@ class RegisterView(generics.CreateAPIView):
 
 
 class LoginView(views.APIView):
-    permission_classes = [AllowAny]  # Public endpoint
+    permission_classes = [AllowAny]  
 
     def post(self, request):
         email = request.data.get('email') or request.data.get('username')
