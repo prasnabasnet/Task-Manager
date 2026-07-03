@@ -32,6 +32,17 @@ class AuthAPITestCase(TestCase):
         self.assertEqual(response.data['user']['email'], 'newuser@example.com')
         self.assertTrue(User.objects.filter(email='newuser@example.com').exists())
 
+    def test_register_ignores_role_override(self):
+        data = {
+            'email': 'attacker@example.com',
+            'password': 'AttackPass123',
+            'role': 'ADMIN'
+        }
+        response = self.client.post(self.register_url, data, format='json')
+        self.assertEqual(response.status_code, 201)
+        user = User.objects.get(email='attacker@example.com')
+        self.assertEqual(user.role, 'TM')
+
     def test_login_success(self):
         data = {
             'email': 'test@example.com',
@@ -73,3 +84,88 @@ class AuthAPITestCase(TestCase):
     def test_me_unauthenticated(self):
         response = self.client.get(self.me_url)
         self.assertEqual(response.status_code, 401)
+
+
+class UserViewSetTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.admin = User.objects.create_user(
+            email='admin@example.com',
+            password='adminpass123',
+            role='ADMIN'
+        )
+        self.member = User.objects.create_user(
+            email='member@example.com',
+            password='memberpass123',
+            role='TM'
+        )
+        self.admin_token = Token.objects.create(user=self.admin)
+        self.member_token = Token.objects.create(user=self.member)
+        self.list_url = '/api/users/'
+
+    def _auth_as(self, token):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+
+    def test_list_users_as_admin(self):
+        self._auth_as(self.admin_token)
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 200)
+        emails = [u['email'] for u in response.data]
+        self.assertIn('member@example.com', emails)
+
+    def test_list_users_as_non_admin_forbidden(self):
+        self._auth_as(self.member_token)
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_list_users_unauthenticated(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_retrieve_user_as_admin(self):
+        self._auth_as(self.admin_token)
+        response = self.client.get(f'{self.list_url}{self.member.id}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['email'], 'member@example.com')
+
+    def test_partial_update_role_as_admin(self):
+        self._auth_as(self.admin_token)
+        response = self.client.patch(
+            f'{self.list_url}{self.member.id}/',
+            {'role': 'PM'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.role, 'PM')
+
+    def test_create_disabled(self):
+        self._auth_as(self.admin_token)
+        response = self.client.post(
+            self.list_url,
+            {'email': 'new@example.com', 'password': 'x', 'role': 'TM'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, 405)
+
+    def test_full_update_disabled(self):
+        self._auth_as(self.admin_token)
+        response = self.client.put(
+            f'{self.list_url}{self.member.id}/',
+            {'email': 'member@example.com', 'role': 'PM'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, 405)
+
+    def test_destroy_soft_deletes_as_admin(self):
+        self._auth_as(self.admin_token)
+        response = self.client.delete(f'{self.list_url}{self.member.id}/')
+        self.assertEqual(response.status_code, 204)
+        self.member.refresh_from_db()
+        self.assertFalse(self.member.is_active)
+        self.assertTrue(User.objects.filter(id=self.member.id).exists())
+
+    def test_destroy_as_non_admin_forbidden(self):
+        self._auth_as(self.member_token)
+        response = self.client.delete(f'{self.list_url}{self.admin.id}/')
+        self.assertEqual(response.status_code, 403)

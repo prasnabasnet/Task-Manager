@@ -16,6 +16,7 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('role', Role.ADMIN)
         return self.create_user(email, password, **extra_fields)
 
 
@@ -36,7 +37,7 @@ class User(AbstractUser):
     )
     username = models.CharField(max_length=150, blank=True, null=True)
 
-    USERNAME_FIELD = 'email' 
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['role']
 
     def __str__(self):
