@@ -10,14 +10,13 @@ class ReplySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = [
-            'id', 'author', 'body', 'mentions', 'parent', 'created_at', 'updated_at'
-        ]
+        fields = ['id', 'author', 'body', 'mentions', 'parent', 'created_at', 'updated_at']
         read_only_fields = ['id', 'author', 'mentions', 'created_at', 'updated_at']
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    target_type = serializers.ChoiceField(choices=['project', 'task'], write_only=True, required=False)
+    # 1. Added 'organization' to the choices
+    target_type = serializers.ChoiceField(choices=['organization', 'project', 'task'], write_only=True, required=False)
     target_id = serializers.IntegerField(write_only=True, required=False)
     
     author = UserDetailSerializer(read_only=True)
@@ -40,7 +39,6 @@ class CommentSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        # On update, skip target validation as the target is already established on the existing comment
         if self.instance is not None:
             return data
 
@@ -55,19 +53,24 @@ class CommentSerializer(serializers.ModelSerializer):
                     {"detail": "Root comments must include both 'target_type' and 'target_id'."}
                 )
             
-            # Match the target_type string to your exact django app label
-            app_label = 'projects' if target_type == 'project' else 'tasks'
+            # 2. Map target_type strings to your exact django app labels
+            app_mapping = {
+                'organization': 'organizations',
+                'project': 'projects',
+                'task': 'tasks'
+            }
+            app_label = app_mapping.get(target_type)
+            
             try:
                 ct = ContentType.objects.get(app_label=app_label, model=target_type)
             except ContentType.DoesNotExist:
                 raise serializers.ValidationError({"target_type": "Invalid comment target type."})
 
-            # Check if that project/task row actually exists
+            # Check if that specific organization/project/task actually exists
             model_class = ct.model_class()
             if not model_class.objects.filter(id=target_id).exists():
                 raise serializers.ValidationError({"target_id": f"No {target_type} found with ID {target_id}."})
 
-            # Cache the verified layout for perform_create
             data['content_type'] = ct
 
         # Scenario B: It's a reply to an existing comment
@@ -77,25 +80,18 @@ class CommentSerializer(serializers.ModelSerializer):
                     {"detail": "Replies automatically inherit their target. Do not provide target_type or target_id."}
                 )
             
-            # Prevent replying to a reply (keeping it clean and flat)
             if parent.parent is not None:
                 raise serializers.ValidationError({"parent": "You cannot reply to a reply. Only 1-level deep threading allowed."})
 
-            # Inherit content type and object ID from the parent root comment
             data['content_type'] = parent.content_type
             data['target_id'] = parent.object_id
 
         return data
 
     def create(self, validated_data):
-        # target_type and target_id are write_only fields and not part of the model.
-        # We need to pop them so we don't pass them to Comment.objects.create()
         validated_data.pop('target_type', None)
         validated_data.pop('target_id', None)
-        
         comment = super().create(validated_data)
-        
-        # Parse and set mentions
         users = parse_mentions(comment.body)
         comment.mentions.set(users)
         return comment
@@ -103,7 +99,6 @@ class CommentSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         validated_data.pop('target_type', None)
         validated_data.pop('target_id', None)
-        
         instance = super().update(instance, validated_data)
         users = parse_mentions(instance.body)
         instance.mentions.set(users)
