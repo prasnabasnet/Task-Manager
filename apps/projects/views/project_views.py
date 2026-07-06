@@ -1,9 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, viewsets
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
 from apps.projects.models import Project
 from apps.projects.permissions import IsAdminOrPM, IsProjectMemberOrAdmin, IsProjectOwnerOrAdmin
@@ -36,8 +35,3 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
