@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'apps.projects',
     'apps.tasks',
     'apps.comments',
+    'apps.organization',
 ]
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
