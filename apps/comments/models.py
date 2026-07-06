@@ -10,9 +10,9 @@ class Comment(models.Model):
     
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE) # Content type tracks every model installed in the app. So it has info on all the tables.
-    object_id = models.PositiveIntegerField() # Object id tracks the id of the row in the table.
-    commentable_object = GenericForeignKey('content_type', 'object_id') # GenericForeignKey is a way to link to any model in the app.
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    commentable_object = GenericForeignKey('content_type', 'object_id')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

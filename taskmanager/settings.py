@@ -31,15 +31,18 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # django internals
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 3rd party apps
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    # my apps
     'apps.users',
     'apps.projects',
     'apps.tasks',
