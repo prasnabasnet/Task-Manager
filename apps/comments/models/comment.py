@@ -3,10 +3,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from apps.users.models import BaseModel
 
-
-class Comment(BaseModel):
+class Comment(models.Model):
     body = models.TextField()
     mentions = models.ManyToManyField(
         settings.AUTH_USER_MODEL, blank=True, related_name="mentioned_comments"
@@ -16,6 +14,11 @@ class Comment(BaseModel):
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="replies"
     )
 
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE
     )  # Content type tracks every model installed in the app. So it has info on all the tables.
