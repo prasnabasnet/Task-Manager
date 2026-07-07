@@ -1,4 +1,6 @@
+# users/models.py
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 
@@ -24,6 +26,23 @@ class Role(models.TextChoices):
     ADMIN = 'ADMIN', 'Admin'
     PROJECT_MANAGER = 'PM', 'Project Manager'
     TEAM_MEMBER = 'TM', 'Team Member'
+
+
+class BaseModel(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="%(class)s_owned"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.__class__.__name__} (user: {self.user})"
 
 
 class User(AbstractUser):
