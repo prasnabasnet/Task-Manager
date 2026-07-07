@@ -1,0 +1,21 @@
+meta {
+  name: Update Department
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{base_url}}/organizations/1/departments/1/
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Token {{token}}
+}
+
+body:json {
+  {
+    "description": "Core product development department"
+  }
+}
