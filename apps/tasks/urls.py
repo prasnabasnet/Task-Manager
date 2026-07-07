@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views.task_views import TaskViewSet
+from .views.task import TaskViewSet
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
