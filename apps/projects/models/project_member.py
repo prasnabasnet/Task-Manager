@@ -8,19 +8,19 @@ class ProjectMember(models.Model):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        related_name='project_members',
+        related_name="project_members",
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='project_memberships',
+        related_name="project_memberships",
     )
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('project', 'user')
-        verbose_name = 'Project Member'
-        verbose_name_plural = 'Project Members'
+        unique_together = ("project", "user")
+        verbose_name = "Project Member"
+        verbose_name_plural = "Project Members"
 
     def __str__(self):
-        return f'{self.user} joined {self.project}'
+        return f"{self.user} joined {self.project}"
