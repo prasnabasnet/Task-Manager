@@ -13,7 +13,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         permission_classes = [permissions.IsAuthenticated, IsProjectMember]
 
-        if self.action in ['update', 'partial_update']:
+        if self.action in ["update", "partial_update", "destroy"]:
             permission_classes.append(IsCommentAuthorOrAdmin)
 
         return [permission() for permission in permission_classes]
@@ -22,14 +22,14 @@ class CommentViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
 
         # For detail views, don't restrict the queryset to the user's authored comments.
-        # This allows permissions (like IsProjectMember and IsCommentAuthorOrAdmin) to check 
+        # This allows permissions (like IsProjectMember and IsCommentAuthorOrAdmin) to check
         # project membership and author permissions on the specific object, yielding 403 instead of 404.
-        if self.action in ['retrieve', 'update', 'partial_update']:
+        if self.action in ["retrieve", "update", "partial_update", "destroy"]:
             return queryset
 
-        target_type = self.request.query_params.get('target_type')
-        target_id = self.request.query_params.get('target_id')
-        parent_id = self.request.query_params.get('parent')
+        target_type = self.request.query_params.get("target_type")
+        target_id = self.request.query_params.get("target_id")
+        parent_id = self.request.query_params.get("parent")
 
         if parent_id:
             try:
@@ -43,7 +43,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             return queryset.filter(parent_id=parent_id)
 
         if target_type and target_id:
-            app_label = 'projects' if target_type == 'project' else 'tasks'
+            app_label = "projects" if target_type == "project" else "tasks"
             try:
                 ct = ContentType.objects.get(app_label=app_label, model=target_type)
                 target_obj = ct.model_class().objects.get(id=target_id)
@@ -54,13 +54,15 @@ class CommentViewSet(viewsets.ModelViewSet):
             if not permission.has_object_permission(self.request, self, target_obj):
                 self.permission_denied(self.request)
 
-            return queryset.filter(content_type=ct, object_id=target_id, parent__isnull=True)
+            return queryset.filter(
+                content_type=ct, object_id=target_id, parent__isnull=True
+            )
 
         return queryset.filter(author=self.request.user, parent__isnull=True)
 
     def perform_create(self, serializer):
-        content_type = serializer.validated_data.get('content_type')
-        target_id = serializer.validated_data.get('target_id')
+        content_type = serializer.validated_data.get("content_type")
+        target_id = serializer.validated_data.get("target_id")
 
         target_obj = content_type.model_class().objects.get(id=target_id)
         permission = IsProjectMember()
@@ -68,7 +70,5 @@ class CommentViewSet(viewsets.ModelViewSet):
             self.permission_denied(self.request)
 
         serializer.save(
-            author=self.request.user,
-            content_type=content_type,
-            object_id=target_id
+            author=self.request.user, content_type=content_type, object_id=target_id
         )
