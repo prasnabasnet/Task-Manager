@@ -1,6 +1,4 @@
-from rest_framework import viewsets, permissions, status
-from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
+from rest_framework import viewsets, permissions
 from django.contrib.contenttypes.models import ContentType
 
 from apps.comments.models import Comment
