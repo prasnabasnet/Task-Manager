@@ -12,9 +12,15 @@ class TaskViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = TaskFilter
 
+    search_fields = ['title', 'description']
+
+    ordering_fields = ['due_date', 'priority', 'created_at']
+
+    ordering = ['due_date']
+
 
     def get_queryset(self):
-        return Task.objects.filter(created_by=self.request.user).order_by('-due_date')
+        return Task.objects.filter(created_by=self.request.user)
     
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
