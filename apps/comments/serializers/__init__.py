@@ -1,1 +1,1 @@
-from .comment import CommentSerializer, ReplySerializer
+from .comment import CommentSerializer, ReplySerializer  # noqa: F401
