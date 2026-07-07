@@ -9,5 +9,5 @@ class TaskFilter(django_filters.FilterSet):
 
     class Meta:
         model = Task
-        fields = ['__all__']
-        exclude = ['created_by', 'created_at', 'updated_at']
+        fields = ['title', 'due_date_min', 'due_date_max', 'project', 'status', 'priority', 'assignee']
+        
