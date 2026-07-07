@@ -1,5 +1,7 @@
 from rest_framework import permissions
-
+from apps.projects.models import Project
+from apps.tasks.models import Task
+from apps.comments.models import Comment
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated and request.user.role == 'ADMIN')
@@ -12,10 +14,6 @@ class IsProjectMember(permissions.BasePermission):
         
         if getattr(request.user, 'role', None) == 'ADMIN':
             return True
-
-        from apps.projects.models import Project
-        from apps.tasks.models import Task
-        from apps.comments.models import Comment
 
         if isinstance(obj, Project):
             project = obj

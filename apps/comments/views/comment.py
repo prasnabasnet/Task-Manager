@@ -15,7 +15,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         permission_classes = [permissions.IsAuthenticated, IsProjectMember]
 
-        if self.action in ['update', 'partial_update', 'destroy']:
+        if self.action in ['update', 'partial_update']:
             permission_classes.append(IsCommentAuthorOrAdmin)
 
         return [permission() for permission in permission_classes]
@@ -26,7 +26,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         # For detail views, don't restrict the queryset to the user's authored comments.
         # This allows permissions (like IsProjectMember and IsCommentAuthorOrAdmin) to check 
         # project membership and author permissions on the specific object, yielding 403 instead of 404.
-        if self.action in ['retrieve', 'update', 'partial_update', 'destroy']:
+        if self.action in ['retrieve', 'update', 'partial_update']:
             return queryset
 
         target_type = self.request.query_params.get('target_type')
