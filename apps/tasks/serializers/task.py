@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from apps.users.serializers import UserDetailSerializer
-from .models import Task
+from apps.tasks.models import Task
 
 class TaskSerializer(serializers.ModelSerializer):
     created_by = UserDetailSerializer(read_only=True)
