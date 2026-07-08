@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from apps.projects.views import ProjectMemberListAddView, ProjectMemberRemoveView, ProjectViewSet
 
 router = DefaultRouter()
-router.register('projects', ProjectViewSet, basename='project')
+router.register(r'', ProjectViewSet, basename='project')
 
 urlpatterns = [
     path('', include(router.urls)),

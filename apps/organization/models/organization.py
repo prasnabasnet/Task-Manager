@@ -10,6 +10,11 @@ class Organization(models.Model):
     owner = models.ForeignKey('users.User',on_delete=models.PROTECT,related_name='owned_organization')
     slug = models.SlugField(max_length=250, blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    members = models.ManyToManyField(
+        'users.User',
+        through='OrganizationMember',
+        related_name='member_organizations',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -25,7 +30,7 @@ class Organization(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
             
-        self.save(*args, **kwargs)
+
 
 
 
