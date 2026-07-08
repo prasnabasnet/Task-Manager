@@ -1,3 +1,3 @@
-from .user import User, UserManager, Role
+from .user import Role, User, UserManager
 
-__all__ = ['User', 'UserManager', 'Role']
+__all__ = ["User", "UserManager", "Role", "BaseModel"]
