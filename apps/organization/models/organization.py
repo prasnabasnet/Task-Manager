@@ -12,7 +12,7 @@ class Organization(models.Model):
     is_active = models.BooleanField(default=True)
     members = models.ManyToManyField(
         'users.User',
-        through='OrganizationMembership',
+        through='OrganizationMember',
         related_name='member_organizations',
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -30,29 +30,6 @@ class Organization(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
             
-        super().save(*args, **kwargs)
-
-
-class OrganizationMembership(models.Model):
-    organization = models.ForeignKey(
-        Organization,
-        on_delete=models.CASCADE,
-        related_name="memberships",
-    )
-    user = models.ForeignKey(
-        'users.User',
-        on_delete=models.CASCADE,
-        related_name="organization_memberships",
-    )
-    joined_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('organization', 'user')
-        verbose_name = 'Organization Member'
-        verbose_name_plural = 'Organization Members'
-
-    def __str__(self):
-        return f'{self.user} in {self.organization}'
 
 
 

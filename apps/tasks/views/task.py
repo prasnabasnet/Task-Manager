@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from apps.tasks.models.task import Task
 from apps.tasks.serializers.task import TaskSerializer
 from rest_framework import viewsets, permissions
