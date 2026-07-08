@@ -1,7 +1,8 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from apps.users.serializers import UserDetailSerializer
+from rest_framework import serializers
+
 from apps.department.models import Department
+from apps.users.serializers import UserDetailSerializer
 
 User = get_user_model()
 
@@ -43,7 +44,9 @@ class DepartmentSerializer(serializers.ModelSerializer):
         ]
         validators = []
 
-    def validate(self, attrs):
+    def validate(
+        self, attrs
+    ):  # makes sure that there are no confilts with naming and only 1 department of 1 name in 1 organization
         view = self.context.get("view")
         if view and hasattr(view, "kwargs"):
             oid = view.kwargs.get("oid")
@@ -54,7 +57,9 @@ class DepartmentSerializer(serializers.ModelSerializer):
                     qs = qs.exclude(pk=self.instance.pk)
                 if qs.exists():
                     raise serializers.ValidationError(
-                        {"name": "A department with this name already exists in this organization."}
+                        {
+                            "name": "A department with this name already exists in this organization."
+                        }
                     )
         return attrs
 

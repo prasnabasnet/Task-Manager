@@ -42,7 +42,7 @@ class DepartmentViewSet(viewsets.ModelViewSet):
         org = get_org(self.kwargs["oid"], self.request.user)
         serializer.save(organization=org)
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get"]) #custom nested endpoint 
     def projects(self, request, oid=None, pk=None):
         department = self.get_object()
         projects = department.projects.all()
