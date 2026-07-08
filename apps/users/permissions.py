@@ -1,11 +1,12 @@
 from rest_framework.permissions import BasePermission
 
+
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):
         return bool(
-            request.user and
-            request.user.is_authenticated and
-            request.user.role == 'ADMIN'
+            request.user
+            and request.user.is_authenticated
+            and (request.user.role == "ADMIN" or request.user.is_superuser)
         )
 
 
@@ -14,7 +15,7 @@ class IsSelfOrAdmin(BasePermission):
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        return request.user.role == 'ADMIN' or obj == request.user
+        return request.user.role == "ADMIN" or obj == request.user
 
 
 class IsAdminOrOrgOwner(BasePermission):
@@ -23,10 +24,11 @@ class IsAdminOrOrgOwner(BasePermission):
             return False
         if request.user.is_admin:
             return True
-        
-        oid = view.kwargs.get('oid')
+
+        oid = view.kwargs.get("oid")
         if oid:
             from apps.organization.models import Organization
+
             try:
                 org = Organization.objects.get(pk=oid)
                 return org.owner == request.user
