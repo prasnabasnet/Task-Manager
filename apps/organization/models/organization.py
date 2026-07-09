@@ -1,35 +1,35 @@
 from django.db import models
 from django.utils.text import slugify
 
+
 # Create your models here.
 class Organization(models.Model):
-
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
-    owner = models.ForeignKey('users.User',on_delete=models.PROTECT,related_name='owned_organization')
+    owner = models.ForeignKey(
+        "users.User", on_delete=models.PROTECT, related_name="owned_organization"
+    )
     slug = models.SlugField(max_length=250, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     members = models.ManyToManyField(
-        'users.User',
-        through='OrganizationMembership',
-        related_name='member_organizations',
+        "users.User",
+        through="OrganizationMembership",
+        related_name="member_organizations",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
-    
     def __str__(self):
         return self.name
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-            
+
         super().save(*args, **kwargs)
 
 
@@ -40,19 +40,16 @@ class OrganizationMembership(models.Model):
         related_name="memberships",
     )
     user = models.ForeignKey(
-        'users.User',
+        "users.User",
         on_delete=models.CASCADE,
         related_name="organization_memberships",
     )
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('organization', 'user')
-        verbose_name = 'Organization Member'
-        verbose_name_plural = 'Organization Members'
+        unique_together = ("organization", "user")
+        verbose_name = "Organization Member"
+        verbose_name_plural = "Organization Members"
 
     def __str__(self):
-        return f'{self.user} in {self.organization}'
-
-
-
+        return f"{self.user} in {self.organization}"

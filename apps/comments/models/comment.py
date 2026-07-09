@@ -29,7 +29,6 @@ class Comment(models.Model):
         "content_type", "object_id"
     )  # GenericForeignKey is a way to link to any model in the app.
 
-
     class Meta:
         ordering = ["created_at"]
         db_table = "comments_comment"

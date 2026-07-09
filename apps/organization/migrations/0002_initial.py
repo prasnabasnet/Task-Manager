@@ -6,37 +6,52 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('organization', '0001_initial'),
+        ("organization", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organization',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='owned_organization', to=settings.AUTH_USER_MODEL),
+            model_name="organization",
+            name="owner",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="owned_organization",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='organizationmembership',
-            name='organization',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='memberships', to='organization.organization'),
+            model_name="organizationmembership",
+            name="organization",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="memberships",
+                to="organization.organization",
+            ),
         ),
         migrations.AddField(
-            model_name='organizationmembership',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='organization_memberships', to=settings.AUTH_USER_MODEL),
+            model_name="organizationmembership",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="organization_memberships",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='members',
-            field=models.ManyToManyField(related_name='member_organizations', through='organization.OrganizationMembership', to=settings.AUTH_USER_MODEL),
+            model_name="organization",
+            name="members",
+            field=models.ManyToManyField(
+                related_name="member_organizations",
+                through="organization.OrganizationMembership",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='organizationmembership',
-            unique_together={('organization', 'user')},
+            name="organizationmembership",
+            unique_together={("organization", "user")},
         ),
     ]

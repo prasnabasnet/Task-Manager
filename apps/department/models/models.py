@@ -1,10 +1,13 @@
 from django.db import models
 from django.conf import settings
 
+
 # Create your models here.
 class Department(models.Model):
     organization = models.ForeignKey(
-        "organization.Organization", on_delete=models.CASCADE, related_name="departments"
+        "organization.Organization",
+        on_delete=models.CASCADE,
+        related_name="departments",
     )
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)

@@ -54,7 +54,9 @@ class DepartmentSerializer(serializers.ModelSerializer):
                     qs = qs.exclude(pk=self.instance.pk)
                 if qs.exists():
                     raise serializers.ValidationError(
-                        {"name": "A department with this name already exists in this organization."}
+                        {
+                            "name": "A department with this name already exists in this organization."
+                        }
                     )
         return attrs
 
