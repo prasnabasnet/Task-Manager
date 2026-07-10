@@ -8,9 +8,17 @@ class OrganizationMember(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('organization', 'user')
+
         verbose_name = 'Organization Member'
         verbose_name_plural = 'Organization Members'
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['organization', 'user'],
+                name='unique_organization_member')
+        ]
+
+        db_table = 'organization_member'
 
     def __str__(self):
         return f'{self.user} in {self.organization}'

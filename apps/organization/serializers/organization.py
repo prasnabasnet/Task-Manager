@@ -1,9 +1,7 @@
 from rest_framework import serializers
 from apps.organization.models import Organization
 from apps.users.serializers import UserDetailSerializer
-from django.contrib.auth import get_user_model
 
-user = get_user_model()
 class OrganizationSerializer(serializers.ModelSerializer):
     owner = UserDetailSerializer(read_only=True)
     members = UserDetailSerializer(many=True, read_only=True)
