@@ -1,3 +1,3 @@
-from .views import DepartmentViewSet
+from .department import DepartmentViewSet
 
 __all__ = ["DepartmentViewSet"]
