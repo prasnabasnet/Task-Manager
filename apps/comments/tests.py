@@ -15,7 +15,6 @@ class CommentAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Users
         self.admin = User.objects.create_superuser(
             email='admin@example.com', password='password123', role='ADMIN'
         )
@@ -29,16 +28,13 @@ class CommentAPITests(TestCase):
             email='other@example.com', password='password123', role='TM', username='other_user'
         )
 
-        # Projects
         self.project = Project.objects.create(name='Test Project', owner=self.pm_user)
         ProjectMember.objects.create(project=self.project, user=self.dev_user)
 
-        # Tasks
         self.task = Task.objects.create(
             project=self.project, title='Test Task', created_by=self.pm_user
         )
 
-        # URL
         self.url = reverse('comment-list')
 
     def get_auth_client(self, user):
@@ -61,7 +57,6 @@ class CommentAPITests(TestCase):
 
     def test_post_comment_with_mention(self):
         client = self.get_auth_client(self.dev_user)
-        # Mention pm_user
         data = {
             'body': 'Hey @pm_user please look at this',
             'parent': None,
@@ -70,8 +65,7 @@ class CommentAPITests(TestCase):
         }
         response = client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, 201)
-        
-        # Verify mentions
+
         comment = Comment.objects.get(id=response.data['id'])
         self.assertIn(self.pm_user, comment.mentions.all())
         self.assertEqual(comment.mentions.count(), 1)
@@ -79,7 +73,6 @@ class CommentAPITests(TestCase):
 
     def test_threaded_replies(self):
         client = self.get_auth_client(self.dev_user)
-        # Create parent comment
         task_ct = ContentType.objects.get_for_model(self.task)
         parent = Comment.objects.create(
             content_type=task_ct,
@@ -93,13 +86,10 @@ class CommentAPITests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['parent'], parent.id)
 
-        # Retrieve comments list
         get_response = client.get(self.url, {'target_type': 'task', 'target_id': self.task.id})
         self.assertEqual(get_response.status_code, 200)
-        # Only parent should be top-level
         self.assertEqual(len(get_response.data), 1)
         self.assertEqual(get_response.data[0]['id'], parent.id)
-        # Reply should be nested inside parent.replies
         self.assertEqual(len(get_response.data[0]['replies']), 1)
         self.assertEqual(get_response.data[0]['replies'][0]['id'], response.data['id'])
 
@@ -127,7 +117,7 @@ class CommentAPITests(TestCase):
             author=self.dev_user,
             body='Old comment'
         )
-        client = self.get_auth_client(self.pm_user)  # Project manager is not the author
+        client = self.get_auth_client(self.pm_user)
         detail_url = reverse('comment-detail', kwargs={'pk': comment.id})
         
         data = {'body': 'Trying to update'}
@@ -166,8 +156,7 @@ class CommentAPITests(TestCase):
 
     def test_non_project_member_denied(self):
         client = self.get_auth_client(self.other_user)
-        
-        # Denied from listing/creating
+
         data = {
             'body': 'Denied comment',
             'parent': None,
@@ -180,7 +169,6 @@ class CommentAPITests(TestCase):
         response_get = client.get(self.url, {'target_type': 'task', 'target_id': self.task.id})
         self.assertEqual(response_get.status_code, 403)
 
-        # Denied from retrieving comment detail
         task_ct = ContentType.objects.get_for_model(self.task)
         comment = Comment.objects.create(
             content_type=task_ct,

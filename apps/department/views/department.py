@@ -10,7 +10,6 @@ from apps.projects.serializers import ProjectSerializer
 from apps.users.permissions import IsAdminOrOrgOwner
 
 
-# --- HELPER FUNCTION ---
 def get_org(pk, user):
     try:
         org = Organization.objects.get(pk=pk)
@@ -25,7 +24,6 @@ def get_org(pk, user):
     return org
 
 
-# --- VIEWSET ---
 class DepartmentViewSet(viewsets.ModelViewSet):
     serializer_class = DepartmentSerializer
 
@@ -42,7 +40,7 @@ class DepartmentViewSet(viewsets.ModelViewSet):
         org = get_org(self.kwargs["oid"], self.request.user)
         serializer.save(organization=org)
 
-    @action(detail=True, methods=["get"]) #custom nested endpoint 
+    @action(detail=True, methods=["get"])
     def projects(self, request, oid=None, pk=None):
         department = self.get_object()
         projects = department.projects.all()
