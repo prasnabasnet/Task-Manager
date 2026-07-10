@@ -9,6 +9,7 @@ class Project(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="owned_projects",
+        help_text="The user who owns this project. Cannot be deleted while owning a project.",
     )
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
@@ -21,6 +22,7 @@ class Project(models.Model):
         null=True,
         blank=True,
         related_name="projects",
+        help_text="The department this project belongs to, if any.",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
