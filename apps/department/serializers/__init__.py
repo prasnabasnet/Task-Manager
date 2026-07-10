@@ -1,3 +1,3 @@
-from .serializers import DepartmentSerializer
+from .department import DepartmentSerializer
 
 __all__ = ["DepartmentSerializer"]

@@ -44,9 +44,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
         ]
         validators = []
 
-    def validate(
-        self, attrs
-    ):  # makes sure that there are no confilts with naming and only 1 department of 1 name in 1 organization
+    def validate(self, attrs):
         view = self.context.get("view")
         if view and hasattr(view, "kwargs"):
             oid = view.kwargs.get("oid")

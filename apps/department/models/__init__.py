@@ -1,3 +1,3 @@
-from .models import Department
+from .department import Department
 
 __all__ = ["Department"]

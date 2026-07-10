@@ -24,7 +24,6 @@ class ReplySerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    # 1. Added 'organization' to the choices
     target_type = serializers.ChoiceField(
         choices=["organization", "project", "task"], write_only=True, required=False
     )
@@ -67,7 +66,6 @@ class CommentSerializer(serializers.ModelSerializer):
         target_type = data.get("target_type")
         target_id = data.get("target_id")
 
-        # Scenario A: It's a new root comment
         if not parent:
             if not target_type or not target_id:
                 raise serializers.ValidationError(
@@ -76,7 +74,6 @@ class CommentSerializer(serializers.ModelSerializer):
                     }
                 )
 
-            # 2. Map target_type strings to your exact django app labels
             app_mapping = {
                 "organization": "organization",
                 "project": "projects",
@@ -91,7 +88,6 @@ class CommentSerializer(serializers.ModelSerializer):
                     {"target_type": "Invalid comment target type."}
                 )
 
-            # Check if that specific organization/project/task actually exists
             model_class = ct.model_class()
             if not model_class.objects.filter(id=target_id).exists():
                 raise serializers.ValidationError(
@@ -100,7 +96,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
             data["content_type"] = ct
 
-        # Scenario B: It's a reply to an existing comment
         else:
             if target_type or target_id:
                 raise serializers.ValidationError(

@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.organization.models import Organization, OrganizationMembership
+from apps.organization.models import Organization, OrganizationMember
 from apps.department.models import Department
 from apps.projects.models import Project
 
@@ -14,7 +14,6 @@ class DepartmentAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Users
         self.admin = User.objects.create_superuser(
             email='admin@example.com', password='password123', role='ADMIN'
         )
@@ -28,11 +27,9 @@ class DepartmentAPITests(TestCase):
             email='nonmember@example.com', password='password123', role='TM', username='non_member'
         )
 
-        # Organization
         self.org = Organization.objects.create(name='Test Org', owner=self.org_owner)
-        OrganizationMembership.objects.create(organization=self.org, user=self.org_member)
+        OrganizationMember.objects.create(organization=self.org, user=self.org_member)
 
-        # Department
         self.department = Department.objects.create(
             organization=self.org,
             name='Engineering',
@@ -41,7 +38,6 @@ class DepartmentAPITests(TestCase):
         )
         self.department.members.add(self.org_member)
 
-        # Project in Department
         self.project = Project.objects.create(
             name='Project A',
             owner=self.org_owner,

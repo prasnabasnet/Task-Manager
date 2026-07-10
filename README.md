@@ -54,10 +54,10 @@ Because Django's default test file is named `tests.py` (which pytest doesn't aut
 
 ```bash
 # Using uv:
-uv run pytest users/tests.py --ds=taskmanager.settings
+uv run pytest users/tests.py --ds=config.settings
 
 # Using activated virtual environment:
-pytest users/tests.py --ds=taskmanager.settings
+pytest users/tests.py --ds=config.settings
 ```
 
 ---
@@ -75,7 +75,7 @@ The following authentication API endpoints are implemented under the `/api/` pre
 
 ## Project Structure
 
-- `taskmanager/`: Main configuration module (settings, URLs, WSGI/ASGI configuration).
+- `config/`: Main configuration module (settings, URLs, WSGI/ASGI configuration).
 - `users/`: Authentication, custom User model, serialization, views, and test suites.
 - `projects/`, `tasks/`, `comments/`: Skeleton app directories ready for development.
 - `requirements.txt`: Frozen package dependencies.
