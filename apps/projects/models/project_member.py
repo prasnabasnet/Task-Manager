@@ -18,7 +18,12 @@ class ProjectMember(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("project", "user")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["project", "user"],
+                name="unique_project_member",
+            )
+        ]
         verbose_name = "Project Member"
         verbose_name_plural = "Project Members"
 
