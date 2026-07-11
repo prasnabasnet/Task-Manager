@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
 
 from apps.projects.filters import ProjectFilter
 from apps.projects.models import Project
@@ -18,7 +17,6 @@ User = get_user_model()
 
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProjectFilter
 
@@ -33,10 +31,10 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == "create":
-            return [IsAuthenticated(), IsAdminOrPM()]
+            return [IsAdminOrPM()]
         if self.action in ("update", "partial_update", "destroy"):
-            return [IsAuthenticated(), IsProjectOwnerOrAdmin()]
-        return [IsAuthenticated(), IsProjectMemberOrAdmin()]
+            return [IsProjectOwnerOrAdmin()]
+        return [IsProjectMemberOrAdmin()]
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

@@ -10,7 +10,6 @@ from apps.projects.serializers import ProjectSerializer
 from apps.users.permissions import IsAdminOrOrgOwner
 
 
-# --- HELPER FUNCTION ---
 def get_org(pk, user):
     try:
         org = Organization.objects.get(pk=pk)
@@ -25,7 +24,6 @@ def get_org(pk, user):
     return org
 
 
-# --- VIEWSET ---
 class DepartmentViewSet(viewsets.ModelViewSet):
     serializer_class = DepartmentSerializer
 

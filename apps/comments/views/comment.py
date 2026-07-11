@@ -21,9 +21,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset
 
-        # For detail views, don't restrict the queryset to the user's authored comments.
-        # This allows permissions (like IsProjectMember and IsCommentAuthorOrAdmin) to check
-        # project membership and author permissions on the specific object, yielding 403 instead of 404.
         if self.action in ["retrieve", "update", "partial_update", "destroy"]:
             return queryset
 

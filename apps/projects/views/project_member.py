@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status, views
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.projects.models import Project, ProjectMember
@@ -10,8 +9,6 @@ User = get_user_model()
 
 
 class ProjectMemberListAddView(views.APIView):
-    permission_classes = [IsAuthenticated]
-
     def get_project(self, pk):
         try:
             return Project.objects.get(pk=pk)
@@ -83,8 +80,6 @@ class ProjectMemberListAddView(views.APIView):
 
 
 class ProjectMemberRemoveView(views.APIView):
-    permission_classes = [IsAuthenticated]
-
     def delete(self, request, pk, uid):
         try:
             project = Project.objects.get(pk=pk)

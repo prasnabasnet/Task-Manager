@@ -1,7 +1,8 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from apps.users.serializers import UserDetailSerializer
+from rest_framework import serializers
+
 from apps.department.models import Department
+from apps.users.serializers import UserDetailSerializer
 
 User = get_user_model()
 
