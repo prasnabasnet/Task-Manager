@@ -23,7 +23,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         base_queryset = Project.objects.select_related("owner").annotate(
-            member_count=Count("members", distinct=True)
+            member_count=Count("members", distinct=True),
+            task_count=Count("tasks", distinct=True),
         )
         if user.role == "ADMIN":
             return base_queryset

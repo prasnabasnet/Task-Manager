@@ -1,9 +1,15 @@
-from rest_framework import viewsets, permissions
 from django.contrib.contenttypes.models import ContentType
+from rest_framework import permissions, viewsets
 
 from apps.comments.models import Comment
+from apps.comments.permissions import IsCommentAuthorOrAdmin, IsProjectMember
 from apps.comments.serializers import CommentSerializer
-from apps.comments.permissions import IsProjectMember, IsCommentAuthorOrAdmin
+
+APP_LABEL_MAP = {
+    "organization": "organization",
+    "project": "projects",
+    "task": "tasks",
+}
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -40,7 +46,10 @@ class CommentViewSet(viewsets.ModelViewSet):
             return queryset.filter(parent_id=parent_id)
 
         if target_type and target_id:
-            app_label = "projects" if target_type == "project" else "tasks"
+            app_label = APP_LABEL_MAP.get(target_type)
+            if not app_label:
+                return queryset.none()
+
             try:
                 ct = ContentType.objects.get(app_label=app_label, model=target_type)
                 target_obj = ct.model_class().objects.get(id=target_id)

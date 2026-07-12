@@ -1,7 +1,9 @@
 from rest_framework import permissions
+
+from apps.comments.models import Comment
+from apps.organization.models import Organization
 from apps.projects.models import Project
 from apps.tasks.models import Task
-from apps.comments.models import Comment
 
 
 class IsAdmin(permissions.BasePermission):
@@ -21,13 +23,24 @@ class IsProjectMember(permissions.BasePermission):
         if getattr(request.user, "role", None) == "ADMIN":
             return True
 
+        if isinstance(obj, Organization):
+            return (
+                obj.owner == request.user
+                or obj.memberships.filter(user=request.user).exists()
+            )
+
         if isinstance(obj, Project):
             project = obj
         elif isinstance(obj, Task):
             project = obj.project
         elif isinstance(obj, Comment):
             target = obj.commentable_object
-            if isinstance(target, Project):
+            if isinstance(target, Organization):
+                return (
+                    target.owner == request.user
+                    or target.memberships.filter(user=request.user).exists()
+                )
+            elif isinstance(target, Project):
                 project = target
             elif isinstance(target, Task):
                 project = target.project

@@ -1,1 +1,3 @@
-from .comment import CommentSerializer, ReplySerializer  # noqa: F401
+from apps.comments.serializers.comment import CommentSerializer, ReplySerializer
+
+__all__ = ["CommentSerializer", "ReplySerializer"]

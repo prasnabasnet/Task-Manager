@@ -1,1 +1,3 @@
-from .task import TaskSerializer
+from apps.tasks.serializers.task import TaskSerializer
+
+__all__ = ["TaskSerializer"]
