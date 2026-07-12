@@ -140,6 +140,14 @@ USE_I18N = True
 
 USE_TZ = True
 
+MIGRATION_MODULES = {
+    "organization": "apps.organization.migrations",
+    "department": "apps.department.migrations",
+    "projects": "apps.projects.migrations",
+    "tasks": "apps.tasks.migrations",
+    "comments": "apps.comments.migrations",
+    "users": "apps.users.migrations",
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
