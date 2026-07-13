@@ -26,7 +26,13 @@ class Department(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ("organization", "name")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "name"], name="unique_department"
+            )
+        ]
+
+        db_table = "department"
 
     def __str__(self):
         return f"{self.name} in {self.organization.name}"
