@@ -20,7 +20,7 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.save()
         token, _ = Token.objects.get_or_create(user=user)
         return Response(
-            {"user": UserRegisterSerializer(user).data, "token": token.key},
+            {"user": UserDetailSerializer(user).data, "token": token.key},
             status=status.HTTP_201_CREATED,
         )
 
@@ -29,7 +29,7 @@ class LoginView(views.APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get("email") or request.data.get("username")
+        email = request.data.get("email")
         password = request.data.get("password")
         if not email or not password:
             return Response(
@@ -40,7 +40,7 @@ class LoginView(views.APIView):
         if user is not None:
             token, _ = Token.objects.get_or_create(user=user)
             return Response(
-                {"token": token.key, "user": UserRegisterSerializer(user).data},
+                {"token": token.key, "user": UserDetailSerializer(user).data},
                 status=status.HTTP_200_OK,
             )
         else:

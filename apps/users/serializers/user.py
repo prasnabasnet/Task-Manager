@@ -12,10 +12,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "password"]
+        fields = ["email", "username", "password"]
 
     def create(self, validated_data):
-        validated_data["role"] = User._meta.get_field("role").default
+        # Default role for new registrations is Team Member
+        validated_data["role"] = "TM"
         password = validated_data.pop("password")
         return User.objects.create_user(password=password, **validated_data)
 
@@ -26,17 +27,18 @@ class UserDetailSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "email",
+            "username",
             "first_name",
             "last_name",
             "role",
             "date_joined",
             "is_active",
         ]
-        read_only_fields = ["id", "email", "date_joined", "is_active"]
+        read_only_fields = ["id", "email", "date_joined"]
 
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "role", "date_joined"]
+        fields = ["id", "email", "username", "role", "date_joined"]
         read_only_fields = ["id", "email", "date_joined"]
