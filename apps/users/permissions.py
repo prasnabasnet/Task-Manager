@@ -19,10 +19,15 @@ class IsSelfOrAdmin(BasePermission):
 
 
 class IsAdminOrOrgOwner(BasePermission):
+    """
+    Permission to check if the user is a site Admin OR the owner
+    of the organization associated with the request.
+    """
+
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
-        if request.user.is_admin:
+        if request.user.role == "ADMIN" or request.user.is_superuser:
             return True
 
         oid = view.kwargs.get("oid")
@@ -37,6 +42,10 @@ class IsAdminOrOrgOwner(BasePermission):
         return False
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_admin:
+        if request.user.role == "ADMIN" or request.user.is_superuser:
             return True
-        return obj.organization.owner == request.user
+        # Assumes the object has an 'organization' attribute
+        return (
+            getattr(obj, "organization", None)
+            and obj.organization.owner == request.user
+        )

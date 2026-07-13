@@ -17,14 +17,14 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=15, choices=Role.choices, default=Role.TEAM_MEMBER
     )
-    username = models.CharField(max_length=150, blank=True, null=True)
+    username = models.CharField(max_length=150, unique=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["role"]
+    REQUIRED_FIELDS = ["username", "role"]
 
     @property
     def is_admin(self):
-        return self.role == Role.ADMIN
+        return self.role == Role.ADMIN or self.is_superuser
 
     def __str__(self):
-        return self.email
+        return f"{self.username} ({self.email})"
