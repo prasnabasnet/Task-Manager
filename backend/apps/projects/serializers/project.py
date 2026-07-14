@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from apps.projects.models import Project
+from apps.department.models import Department
 
 User = get_user_model()
 
@@ -10,6 +11,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     owner = serializers.SerializerMethodField()
     member_count = serializers.SerializerMethodField()
     task_count = serializers.SerializerMethodField()
+    department = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all())
 
     class Meta:
         model = Project
@@ -18,6 +20,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "owner",
+            "department",
             "member_count",
             "task_count",
             "created_at",
@@ -37,3 +40,19 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_task_count(self, obj):
         return getattr(obj, "task_count", 0)
+
+    def validate_department(self, value):
+        user = self.context.get("request") and self.context["request"].user
+        if not user:
+            return value
+        if getattr(user, "is_admin", False):
+            return value
+
+        org = value.organization
+        is_owner = org.owner == user
+        is_member = org.memberships.filter(user=user).exists()
+        if not (is_owner or is_member):
+            raise serializers.ValidationError(
+                "You must belong to the organization of this department to create/assign a project in it."
+            )
+        return value

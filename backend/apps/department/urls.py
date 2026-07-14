@@ -7,7 +7,7 @@ dept_detail = DepartmentViewSet.as_view(
     {"get": "retrieve", "patch": "partial_update", "put": "update", "delete": "destroy"}
 )
 
-dept_projects = DepartmentViewSet.as_view({"get": "projects"})
+dept_projects = DepartmentViewSet.as_view({"get": "projects", "post": "projects"})
 
 urlpatterns = [
     path("organizations/<int:oid>/departments/", dept_list, name="dept-list"),

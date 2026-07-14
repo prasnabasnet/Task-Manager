@@ -31,7 +31,7 @@ export default function App() {
           </Protected>
         }
       >
-        <Route index element={<Projects />} />
+        <Route index element={<Navigate to="/organizations" replace />} />
         <Route path="organizations" element={<Organizations />} />
         <Route path="users" element={<Users />} />
         <Route path="projects/:projectId/board" element={<Board />} />

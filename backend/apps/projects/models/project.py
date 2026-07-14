@@ -18,11 +18,9 @@ class Project(models.Model):
     )
     department = models.ForeignKey(
         "department.Department",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name="projects",
-        help_text="The department this project belongs to, if any.",
+        help_text="The department this project belongs to.",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

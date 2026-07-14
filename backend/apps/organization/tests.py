@@ -13,7 +13,7 @@ class OrganizationAPITests(TestCase):
         self.client = APIClient()
 
         self.admin = User.objects.create_superuser(
-            email="admin@example.com", password="password123", role="ADMIN"
+            email="admin@example.com", username="admin", password="password123", role="ADMIN"
         )
         self.owner = User.objects.create_user(
             email="owner@example.com",
