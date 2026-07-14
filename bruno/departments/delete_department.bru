@@ -1,11 +1,11 @@
 meta {
   name: Delete Department
   type: http
-  seq: 5
+  seq: 6
 }
 
 delete {
-  url: {{base_url}}/organizations/1/departments/1/
+  url: {{base_url}}/organizations/{{organization_id}}/departments/{{department_id}}/
   body: none
   auth: none
 }

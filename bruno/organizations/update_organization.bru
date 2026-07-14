@@ -1,11 +1,11 @@
 meta {
-  name: Update Project
+  name: Update Organization
   type: http
   seq: 4
 }
 
 patch {
-  url: {{base_url}}/projects/{{project_id}}/
+  url: {{base_url}}/organizations/{{organization_id}}/
   body: json
   auth: none
 }
@@ -17,7 +17,6 @@ headers {
 
 body:json {
   {
-    "name": "TaskFlow App Updated",
-    "description": "Updated project description"
+    "description": "Updated organization description"
   }
 }

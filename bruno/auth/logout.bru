@@ -1,11 +1,11 @@
 meta {
-  name: Get Comment
+  name: Logout
   type: http
   seq: 4
 }
 
-get {
-  url: {{base_url}}/comments/{{comment_id}}/
+post {
+  url: {{base_url}}/users/auth/logout/
   body: none
   auth: none
 }
