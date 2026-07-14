@@ -6,11 +6,9 @@ from apps.users.models import User
 
 
 def parse_mentions(text):
-    """Resolve @handles in comment text to users by username or email local-part.
-
-    Examples:
-        @manager_bob  -> username match
-        @bob          -> bob@example.com (email local-part) or username "bob"
+    """Examples:
+    @manager_bob  -> username match
+    @bob          -> bob@example.com (email local-part) or username "bob"
     """
     if not text:
         return User.objects.none()
