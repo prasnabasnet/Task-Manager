@@ -5,6 +5,8 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.comments.models import Comment
+from apps.organization.models import Organization
+from apps.department.models import Department
 from apps.projects.models import Project, ProjectMember
 from apps.tasks.models import Task
 
@@ -40,7 +42,9 @@ class CommentAPITests(TestCase):
             username="other_user",
         )
 
-        self.project = Project.objects.create(name="Test Project", owner=self.pm_user)
+        self.org = Organization.objects.create(name="Comment Org", owner=self.pm_user)
+        self.dept = Department.objects.create(organization=self.org, name="Comment Dept")
+        self.project = Project.objects.create(name="Test Project", owner=self.pm_user, department=self.dept)
         ProjectMember.objects.create(project=self.project, user=self.dev_user)
 
         self.task = Task.objects.create(

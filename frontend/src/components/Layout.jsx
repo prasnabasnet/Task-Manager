@@ -25,9 +25,6 @@ export default function Layout() {
 
         <nav className="sidebar-nav">
           <div className="nav-section-label">Workspace</div>
-          <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-            Projects
-          </NavLink>
           <NavLink
             to="/organizations"
             className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}

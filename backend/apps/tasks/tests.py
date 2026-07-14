@@ -3,6 +3,8 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from apps.organization.models import Organization
+from apps.department.models import Department
 from apps.projects.models import Project, ProjectMember
 from apps.tasks.models import Task
 
@@ -14,7 +16,7 @@ class TaskAPITests(TestCase):
         self.client = APIClient()
 
         self.admin = User.objects.create_superuser(
-            email="admin@example.com", password="password123", role="ADMIN"
+            email="admin@example.com", username="admin", password="password123", role="ADMIN"
         )
         self.owner = User.objects.create_user(
             email="owner@example.com",
@@ -41,8 +43,10 @@ class TaskAPITests(TestCase):
             username="outsider",
         )
 
+        self.org = Organization.objects.create(name="Task Org", owner=self.owner)
+        self.dept = Department.objects.create(organization=self.org, name="Task Dept")
         self.project = Project.objects.create(
-            name="Task Test Project", owner=self.owner
+            name="Task Test Project", owner=self.owner, department=self.dept
         )
         ProjectMember.objects.create(project=self.project, user=self.member)
         ProjectMember.objects.create(project=self.project, user=self.other_member)

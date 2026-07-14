@@ -33,6 +33,8 @@ export const departmentsApi = {
   remove: (oid, id) => api.delete(`/organizations/${oid}/departments/${id}/`),
   projects: (oid, id) =>
     api.get(`/organizations/${oid}/departments/${id}/projects/`),
+  createProject: (oid, id, body) =>
+    api.post(`/organizations/${oid}/departments/${id}/projects/`, body),
 }
 
 export const projectsApi = {

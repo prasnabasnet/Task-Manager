@@ -40,9 +40,23 @@ class DepartmentViewSet(viewsets.ModelViewSet):
         org = get_org(self.kwargs["oid"], self.request.user)
         serializer.save(organization=org)
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get", "post"])
     def projects(self, request, oid=None, pk=None):
         department = self.get_object()
+        if request.method == "POST":
+            if not (request.user.is_admin or request.user.role == "PM"):
+                raise PermissionDenied("Only admins and project managers can create projects.")
+            
+            data = request.data.copy()
+            data["department"] = department.pk
+            serializer = ProjectSerializer(
+                data=data,
+                context={"request": request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save(owner=request.user)
+            return Response(serializer.data, status=201)
+
         projects = department.projects.all()
         serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)

@@ -15,7 +15,7 @@ class ProjectAPITests(TestCase):
         self.client = APIClient()
 
         self.admin = User.objects.create_superuser(
-            email="admin@example.com", password="password123", role="ADMIN"
+            email="admin@example.com", username="admin", password="password123", role="ADMIN"
         )
         self.pm_user = User.objects.create_user(
             email="pm@example.com",
@@ -42,7 +42,9 @@ class ProjectAPITests(TestCase):
             username="outsider",
         )
 
-        self.project = Project.objects.create(name="Test Project", owner=self.pm_user)
+        self.org = Organization.objects.create(name="Org A", owner=self.pm_user)
+        self.dept = Department.objects.create(organization=self.org, name="Eng")
+        self.project = Project.objects.create(name="Test Project", owner=self.pm_user, department=self.dept)
         ProjectMember.objects.create(project=self.project, user=self.dev_user)
 
         self.list_url = reverse("project-list")
@@ -55,35 +57,35 @@ class ProjectAPITests(TestCase):
 
     def test_create_project_by_pm_success(self):
         client = self.get_auth_client(self.pm_user)
-        data = {"name": "New Project", "description": "desc"}
+        data = {"name": "New Project", "description": "desc", "department": self.dept.id}
         response = client.post(self.list_url, data, format="json")
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data["owner"]["email"], self.pm_user.email)
 
     def test_create_project_by_admin_success(self):
         client = self.get_auth_client(self.admin)
-        data = {"name": "Admin Project"}
+        data = {"name": "Admin Project", "department": self.dept.id}
         response = client.post(self.list_url, data, format="json")
         self.assertEqual(response.status_code, 201)
 
     def test_create_project_by_team_member_forbidden(self):
         client = self.get_auth_client(self.dev_user)
-        data = {"name": "Should Fail"}
+        data = {"name": "Should Fail", "department": self.dept.id}
         response = client.post(self.list_url, data, format="json")
         self.assertEqual(response.status_code, 403)
 
     def test_create_project_unauthenticated_denied(self):
-        response = self.client.post(self.list_url, {"name": "No Auth"}, format="json")
+        response = self.client.post(self.list_url, {"name": "No Auth", "department": self.dept.id}, format="json")
         self.assertEqual(response.status_code, 401)
 
     def test_create_project_duplicate_name_rejected(self):
         client = self.get_auth_client(self.pm_user)
-        response = client.post(self.list_url, {"name": "Test Project"}, format="json")
+        response = client.post(self.list_url, {"name": "Test Project", "department": self.dept.id}, format="json")
         self.assertEqual(response.status_code, 400)
 
     def test_create_project_owner_forced_to_requester(self):
         client = self.get_auth_client(self.pm_user)
-        data = {"name": "Owner Override Attempt", "owner": self.other_pm.id}
+        data = {"name": "Owner Override Attempt", "owner": self.other_pm.id, "department": self.dept.id}
         response = client.post(self.list_url, data, format="json")
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data["owner"]["email"], self.pm_user.email)
@@ -167,7 +169,7 @@ class ProjectAPITests(TestCase):
         self.assertTrue(Project.objects.filter(id=self.project.id).exists())
 
     def test_filter_by_name_icontains(self):
-        Project.objects.create(name="Zeta Rollout", owner=self.pm_user)
+        Project.objects.create(name="Zeta Rollout", owner=self.pm_user, department=self.dept)
         client = self.get_auth_client(self.admin)
         response = client.get(self.list_url, {"name": "zeta"})
         names = [p["name"] for p in response.data]
@@ -175,7 +177,7 @@ class ProjectAPITests(TestCase):
         self.assertNotIn("Test Project", names)
 
     def test_filter_by_owner_id(self):
-        Project.objects.create(name="Other PM Project", owner=self.other_pm)
+        Project.objects.create(name="Other PM Project", owner=self.other_pm, department=self.dept)
         client = self.get_auth_client(self.admin)
         response = client.get(self.list_url, {"owner": self.other_pm.id})
         names = [p["name"] for p in response.data]
@@ -183,8 +185,8 @@ class ProjectAPITests(TestCase):
         self.assertNotIn("Test Project", names)
 
     def test_project_with_department(self):
-        org = Organization.objects.create(name="Org A", owner=self.pm_user)
-        dept = Department.objects.create(organization=org, name="Eng")
+        org = Organization.objects.create(name="Unique Org X", owner=self.pm_user)
+        dept = Department.objects.create(organization=org, name="Eng Unique")
         client = self.get_auth_client(self.pm_user)
         project = Project.objects.create(
             name="Dept Project", owner=self.pm_user, department=dept
@@ -199,7 +201,7 @@ class ProjectMemberAPITests(TestCase):
         self.client = APIClient()
 
         self.admin = User.objects.create_superuser(
-            email="admin@example.com", password="password123", role="ADMIN"
+            email="admin@example.com", username="admin", password="password123", role="ADMIN"
         )
         self.owner = User.objects.create_user(
             email="owner@example.com",
@@ -226,8 +228,10 @@ class ProjectMemberAPITests(TestCase):
             username="outsider",
         )
 
+        self.org = Organization.objects.create(name="Member Test Org", owner=self.owner)
+        self.dept = Department.objects.create(organization=self.org, name="Member Test Dept")
         self.project = Project.objects.create(
-            name="Member Test Project", owner=self.owner
+            name="Member Test Project", owner=self.owner, department=self.dept
         )
         ProjectMember.objects.create(project=self.project, user=self.member)
 
