@@ -1,11 +1,11 @@
 meta {
   name: Get Department Projects
   type: http
-  seq: 6
+  seq: 5
 }
 
 get {
-  url: {{base_url}}/organizations/1/departments/1/projects/
+  url: {{base_url}}/organizations/{{organization_id}}/departments/{{department_id}}/projects/
   body: none
   auth: none
 }

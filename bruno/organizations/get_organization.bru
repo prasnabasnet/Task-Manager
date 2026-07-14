@@ -1,17 +1,13 @@
 meta {
-  name: List Tasks
+  name: Get Organization
   type: http
-  seq: 1
+  seq: 3
 }
 
 get {
-  url: {{base_url}}/tasks/
+  url: {{base_url}}/organizations/{{organization_id}}/
   body: none
   auth: none
-}
-
-params:query {
-  ~project: {{project_id}}
 }
 
 headers {

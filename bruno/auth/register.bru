@@ -5,17 +5,25 @@ meta {
 }
 
 post {
-  url: {{base_url}}/auth/register/
+  url: {{base_url}}/users/auth/register/
   body: json
   auth: none
 }
 
+headers {
+  Content-Type: application/json
+}
+
 body:json {
   {
-    "username": "pm_user",
-    "email": "pm@example.com",
+    "username": "bruno_user",
+    "email": "bruno@example.com",
     "password": "SecurePassword123!"
   }
-  
 }
-​
+
+script:post-response {
+  if (res.status === 201 && res.body.token) {
+    bru.setEnvVar("token", res.body.token);
+  }
+}

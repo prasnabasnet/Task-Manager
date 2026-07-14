@@ -3,7 +3,7 @@
     "model": "users.user",
     "pk": 1,
     "fields": {
-      "password": "pbkdf2_sha256$600000$A9p68JAtuX2N$pX8eIq0f6eX9R8qE7f8S1P6v9R8E7f8S1P6v9R8=",
+      "password": "pbkdf2_sha256$1200000$B4SQFzC0P4PCavB2Om7RLA$CXRDnBpYsWkxR68oQMKKaLQyx0wHLLkigGAergMMYP8=",
       "last_login": null,
       "is_superuser": true,
       "username": "admin_user",
@@ -22,7 +22,7 @@
     "model": "users.user",
     "pk": 2,
     "fields": {
-      "password": "pbkdf2_sha256$600000$A9p68JAtuX2N$pX8eIq0f6eX9R8qE7f8S1P6v9R8E7f8S1P6v9R8=",
+      "password": "pbkdf2_sha256$1200000$IP4no6d3qcyXaPr6LcOzra$PcxmSikWtnJ2WeTPUEiI6rvhooAI68Uqwyqti7Gz7BA=",
       "last_login": null,
       "is_superuser": false,
       "username": "manager_bob",
@@ -41,7 +41,7 @@
     "model": "users.user",
     "pk": 3,
     "fields": {
-      "password": "pbkdf2_sha256$600000$A9p68JAtuX2N$pX8eIq0f6eX9R8qE7f8S1P6v9R8E7f8S1P6v9R8=",
+      "password": "pbkdf2_sha256$1200000$IP4no6d3qcyXaPr6LcOzra$PcxmSikWtnJ2WeTPUEiI6rvhooAI68Uqwyqti7Gz7BA=",
       "last_login": null,
       "is_superuser": false,
       "username": "developer_sarah",
@@ -60,7 +60,7 @@
     "model": "users.user",
     "pk": 4,
     "fields": {
-      "password": "pbkdf2_sha256$600000$A9p68JAtuX2N$pX8eIq0f6eX9R8qE7f8S1P6v9R8E7f8S1P6v9R8=",
+      "password": "pbkdf2_sha256$1200000$IP4no6d3qcyXaPr6LcOzra$PcxmSikWtnJ2WeTPUEiI6rvhooAI68Uqwyqti7Gz7BA=",
       "last_login": null,
       "is_superuser": false,
       "username": "manager_alice",
@@ -79,7 +79,7 @@
     "model": "users.user",
     "pk": 5,
     "fields": {
-      "password": "pbkdf2_sha256$600000$A9p68JAtuX2N$pX8eIq0f6eX9R8qE7f8S1P6v9R8E7f8S1P6v9R8=",
+      "password": "pbkdf2_sha256$1200000$IP4no6d3qcyXaPr6LcOzra$PcxmSikWtnJ2WeTPUEiI6rvhooAI68Uqwyqti7Gz7BA=",
       "last_login": null,
       "is_superuser": false,
       "username": "developer_david",
@@ -98,7 +98,7 @@
     "model": "users.user",
     "pk": 6,
     "fields": {
-      "password": "pbkdf2_sha256$600000$A9p68JAtuX2N$pX8eIq0f6eX9R8qE7f8S1P6v9R8E7f8S1P6v9R8=",
+      "password": "pbkdf2_sha256$1200000$IP4no6d3qcyXaPr6LcOzra$PcxmSikWtnJ2WeTPUEiI6rvhooAI68Uqwyqti7Gz7BA=",
       "last_login": null,
       "is_superuser": false,
       "username": "designer_emily",
@@ -350,12 +350,17 @@
     "pk": 1,
     "fields": {
       "body": "@developer_sarah please make sure standard grid margins are used.",
-      "mentions": [3],
+      "mentions": [
+        3
+      ],
       "parent": null,
       "author": 2,
       "created_at": "2026-07-08T12:30:00Z",
       "updated_at": "2026-07-08T12:30:00Z",
-      "content_type": ["tasks", "task"],
+      "content_type": [
+        "tasks",
+        "task"
+      ],
       "object_id": 1
     }
   },
@@ -369,7 +374,10 @@
       "author": 3,
       "created_at": "2026-07-08T12:35:00Z",
       "updated_at": "2026-07-08T12:35:00Z",
-      "content_type": ["tasks", "task"],
+      "content_type": [
+        "tasks",
+        "task"
+      ],
       "object_id": 1
     }
   },
@@ -378,12 +386,18 @@
     "pk": 3,
     "fields": {
       "body": "Weekly mobile engineering status meeting scheduled for Friday at 3:00 PM.",
-      "mentions": [3, 6],
+      "mentions": [
+        3,
+        6
+      ],
       "parent": null,
       "author": 4,
       "created_at": "2026-07-08T12:40:00Z",
       "updated_at": "2026-07-08T12:40:00Z",
-      "content_type": ["projects", "project"],
+      "content_type": [
+        "projects",
+        "project"
+      ],
       "object_id": 2
     }
   }

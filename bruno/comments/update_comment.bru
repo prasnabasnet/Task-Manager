@@ -5,17 +5,18 @@ meta {
 }
 
 patch {
-  url: {{base_url}}/comments/1/
+  url: {{base_url}}/comments/{{comment_id}}/
   body: json
   auth: none
 }
 
 headers {
   Authorization: Token {{token}}
+  Content-Type: application/json
 }
 
 body:json {
   {
-    "body": "Updated comment content with a mention: @dev_user"
+    "body": "Updated: Hey @developer_sarah and @bob, please review the auth changes."
   }
 }

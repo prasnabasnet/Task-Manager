@@ -1,11 +1,11 @@
 meta {
-  name: Create Department
+  name: Create Organization
   type: http
   seq: 2
 }
 
 post {
-  url: {{base_url}}/organizations/{{organization_id}}/departments/
+  url: {{base_url}}/organizations/
   body: json
   auth: none
 }
@@ -17,14 +17,13 @@ headers {
 
 body:json {
   {
-    "name": "Engineering",
-    "description": "Product development team",
-    "head_id": 1
+    "name": "Acme Labs",
+    "description": "Product and engineering organization"
   }
 }
 
 script:post-response {
   if (res.status === 201 && res.body.id) {
-    bru.setEnvVar("department_id", String(res.body.id));
+    bru.setEnvVar("organization_id", String(res.body.id));
   }
 }

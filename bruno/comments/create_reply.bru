@@ -1,7 +1,7 @@
 meta {
   name: Create Reply Comment
   type: http
-  seq: 2
+  seq: 3
 }
 
 post {
@@ -12,11 +12,12 @@ post {
 
 headers {
   Authorization: Token {{token}}
+  Content-Type: application/json
 }
 
 body:json {
   {
-    "body": "This is a reply to the parent comment.",
-    "parent": 1
+    "body": "Thanks @admin_user — I'll take a look at this today.",
+    "parent": {{comment_id}}
   }
 }

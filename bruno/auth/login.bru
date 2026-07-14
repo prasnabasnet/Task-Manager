@@ -5,18 +5,24 @@ meta {
 }
 
 post {
-  url: {{base_url}}/auth/login/
+  url: {{base_url}}/users/auth/login/
   body: json
   auth: none
 }
 
+headers {
+  Content-Type: application/json
+}
+
 body:json {
   {
-    "email": "pm@test2.com",
-    "password": "Test1234!"
+    "email": "{{email}}",
+    "password": "{{password}}"
   }
 }
 
 script:post-response {
-  bru.setEnvVar("token", res.body.token);
+  if (res.body.token) {
+    bru.setEnvVar("token", res.body.token);
+  }
 }

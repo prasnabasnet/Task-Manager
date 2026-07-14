@@ -16,7 +16,10 @@ class CommentAPITests(TestCase):
         self.client = APIClient()
 
         self.admin = User.objects.create_superuser(
-            email="admin@example.com", password="password123", role="ADMIN"
+            email="admin@example.com",
+            username="admin_user",
+            password="password123",
+            role="ADMIN",
         )
         self.pm_user = User.objects.create_user(
             email="pm@example.com",
@@ -79,6 +82,22 @@ class CommentAPITests(TestCase):
         self.assertIn(self.pm_user, comment.mentions.all())
         self.assertEqual(comment.mentions.count(), 1)
         self.assertEqual(response.data["mentions"][0]["email"], self.pm_user.email)
+
+    def test_post_comment_with_username_mention(self):
+        client = self.get_auth_client(self.dev_user)
+        data = {
+            "body": "Hey @pm_user please look at this",
+            "parent": None,
+            "target_type": "task",
+            "target_id": self.task.id,
+        }
+        response = client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, 201)
+
+        comment = Comment.objects.get(id=response.data["id"])
+        self.assertIn(self.pm_user, comment.mentions.all())
+        self.assertEqual(comment.mentions.count(), 1)
+        self.assertEqual(response.data["mentions"][0]["username"], "pm_user")
 
     def test_threaded_replies(self):
         client = self.get_auth_client(self.dev_user)

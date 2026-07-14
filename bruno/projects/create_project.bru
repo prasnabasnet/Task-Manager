@@ -12,12 +12,18 @@ post {
 
 headers {
   Authorization: Token {{token}}
+  Content-Type: application/json
 }
 
 body:json {
   {
     "name": "TaskFlow App",
-    "description": "Our intern project management tool"
+    "description": "Intern project management tool"
   }
 }
-​
+
+script:post-response {
+  if (res.status === 201 && res.body.id) {
+    bru.setEnvVar("project_id", String(res.body.id));
+  }
+}
