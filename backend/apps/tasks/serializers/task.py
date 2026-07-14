@@ -40,5 +40,14 @@ class TaskSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        assignee_id = validated_data.pop("assignee_id", None)
         validated_data["created_by"] = self.context["request"].user
+        if assignee_id is not None:
+            validated_data["assignee_id"] = assignee_id
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        assignee_id = validated_data.pop("assignee_id", serializers.empty)
+        if assignee_id is not serializers.empty:
+            instance.assignee_id = assignee_id
+        return super().update(instance, validated_data)
