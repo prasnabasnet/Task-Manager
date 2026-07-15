@@ -1,4 +1,13 @@
 {
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
+  "python.analysis.extraPaths": ["${workspaceFolder}/backend"],
+  "basedpyright.analysis.extraPaths": ["${workspaceFolder}/backend"],
+  "basedpyright.analysis.reportIncompatibleVariableOverride": false,
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  },
+  "explorer.excludeGitIgnore": true,
   "[python]": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {

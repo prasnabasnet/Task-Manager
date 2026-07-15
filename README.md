@@ -1,82 +1,64 @@
-# Task-Manager Backend
+# Task Manager
 
-A Django-based backend for the Task-Manager application, providing authentication and user management built with Django REST Framework (DRF).
+Jira-style task management app with a Django REST API and a React frontend.
 
----
-
-## Prerequisites
-
-- **Python**: `>=3.12` (as specified in `.python-version` and `pyproject.toml`)
-- **Package Manager**: [uv](https://github.com/astral-sh/uv) (recommended) or standard `pip`
-
----
-
-## Getting Started
-
-You can set up and run the project using `uv`
-
-1. **Sync dependencies and create virtual environment**:
-
-   ```bash
-   uv sync
-   ```
-
-   This command automatically creates a virtual environment in `.venv` and installs all dependencies specified in `pyproject.toml` and `uv.lock`.
-
-2. **Run migrations**:
-
-   ```bash
-   uv run python manage.py migrate
-   ```
-
-3. **Start the development server**:
-   ```bash
-   uv run python manage.py runserver
-   ```
-
-## Running Tests
-
-You can run tests using the Django test runner or `pytest`.
-
-### 1. Using Django Test Runner
-
-```bash
-# Using uv:
-uv run python manage.py test
-
-# Using activated virtual environment:
-python manage.py test
 ```
-
-### 2. Using pytest
-
-Because Django's default test file is named `tests.py` (which pytest doesn't automatically discover by default), specify the path and the Django settings module:
-
-```bash
-# Using uv:
-uv run pytest users/tests.py --ds=taskmanager.settings
-
-# Using activated virtual environment:
-pytest users/tests.py --ds=taskmanager.settings
+Task-Manager/
+  backend/     Django REST Framework API
+  frontend/    React (Vite) UI
 ```
 
 ---
 
-## API Endpoints
+## Backend
 
-The following authentication API endpoints are implemented under the `/api/` prefix:
+See paths and setup details under `backend/`.
 
-- **Register**: `POST /api/auth/register/` (Request body: `email`, `password`, `role`)
-- **Login**: `POST /api/auth/login/` (Request body: `email`, `password`)
-- **Logout**: `POST /api/auth/logout/` (Requires Token Auth header)
-- **Get Current User Info**: `GET /api/auth/me/` (Requires Token Auth header)
+```bash
+cd backend
+uv sync
+# ensure backend/.env exists (SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASE_URL)
+uv run python manage.py migrate
+uv run python manage.py loaddata fixtures/test_data.json   # optional
+uv run python manage.py runserver
+```
+
+API base: `http://127.0.0.1:8000/api/`  
+Docs: `http://127.0.0.1:8000/api/docs/`
+
+Seeded admin (from fixtures): `admin@example.com` / `Admin1234!`
 
 ---
 
-## Project Structure
+## Frontend
 
-- `taskmanager/`: Main configuration module (settings, URLs, WSGI/ASGI configuration).
-- `users/`: Authentication, custom User model, serialization, views, and test suites.
-- `projects/`, `tasks/`, `comments/`: Skeleton app directories ready for development.
-- `requirements.txt`: Frozen package dependencies.
-- `pyproject.toml` & `uv.lock`: Modern python packaging configurations.
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Opens at `http://localhost:5173`. Vite proxies `/api` to the Django server.
+
+### What's included
+
+- Login / register
+- Projects list + create
+- Kanban board (drag issues between To Do / In Progress / Done)
+- Backlog (filterable issue list)
+- Issue detail (status, priority, assignee, due date, comments + replies)
+- Project settings (edit, members, delete)
+- Organizations & departments
+- Admin user management
+- Small **ⓘ** icons next to actions — hover to see the exact API method + path
+
+---
+
+## Tech
+
+| Layer | Stack |
+|---|---|
+| Backend | Django 6, DRF, Token auth, django-filter, PostgreSQL, django-cors-headers |
+| Frontend | React 19, React Router, Vite |
+
+Python imports still use `apps.*` and `config.*` — run Django commands from `backend/`.
