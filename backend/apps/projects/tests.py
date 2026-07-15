@@ -355,3 +355,49 @@ class ProjectMemberAPITests(TestCase):
     def test_member_endpoints_unauthenticated_denied(self):
         response = self.client.get(self.members_url)
         self.assertEqual(response.status_code, 401)
+
+
+class ProjectVisibilityTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.owner = User.objects.create_user(
+            email="owner@example.com", password="password123", role="PM", username="owner"
+        )
+        self.project_member = User.objects.create_user(
+            email="member@example.com", password="password123", role="TM", username="project_member"
+        )
+        self.org = Organization.objects.create(name="Org X", owner=self.owner)
+        self.dept = Department.objects.create(organization=self.org, name="Dept X")
+        self.project = Project.objects.create(
+            name="Project X", owner=self.owner, department=self.dept
+        )
+        ProjectMember.objects.create(project=self.project, user=self.project_member)
+
+    def get_auth_client(self, user):
+        client = APIClient()
+        client.force_authenticate(user=user)
+        return client
+
+    def test_project_member_can_list_organization_and_department(self):
+        client = self.get_auth_client(self.project_member)
+
+        # 1. Verify user can list the organization
+        url_org = reverse("organization-list")
+        response_org = client.get(url_org)
+        self.assertEqual(response_org.status_code, 200)
+        org_ids = [org["id"] for org in response_org.data]
+        self.assertIn(self.org.id, org_ids)
+
+        # 2. Verify user can list the department
+        url_dept = reverse("dept-list", kwargs={"oid": self.org.id})
+        response_dept = client.get(url_dept)
+        self.assertEqual(response_dept.status_code, 200)
+        dept_ids = [dept["id"] for dept in response_dept.data]
+        self.assertIn(self.dept.id, dept_ids)
+
+        # 3. Verify user can list the project in department projects action
+        url_proj = reverse("dept-project-list", kwargs={"oid": self.org.id, "pk": self.dept.id})
+        response_proj = client.get(url_proj)
+        self.assertEqual(response_proj.status_code, 200)
+        proj_ids = [p["id"] for p in response_proj.data]
+        self.assertIn(self.project.id, proj_ids)

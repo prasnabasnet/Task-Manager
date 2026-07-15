@@ -19,7 +19,9 @@ def get_org(pk, user):
     if not user.is_admin:
         is_owner = org.owner == user
         is_member = org.memberships.filter(user=user).exists()
-        if not (is_owner or is_member):
+        is_project_member = org.departments.filter(projects__members=user).exists()
+        is_project_owner = org.departments.filter(projects__owner=user).exists()
+        if not (is_owner or is_member or is_project_member or is_project_owner):
             raise PermissionDenied("You are not a member of this organization.")
     return org
 
@@ -33,8 +35,12 @@ class DepartmentViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated()]
 
     def get_queryset(self):
-        org = get_org(self.kwargs["oid"], self.request.user)
-        return org.departments.all()
+        user = self.request.user
+        org = get_org(self.kwargs["oid"], user)
+        if getattr(user, "is_admin", False) or org.owner == user or org.memberships.filter(user=user).exists():
+            return org.departments.all()
+        from django.db.models import Q
+        return org.departments.filter(Q(projects__members=user) | Q(projects__owner=user)).distinct()
 
     def perform_create(self, serializer):
         org = get_org(self.kwargs["oid"], self.request.user)
@@ -58,5 +64,12 @@ class DepartmentViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=201)
 
         projects = department.projects.all()
+        if not request.user.is_admin:
+            org = department.organization
+            is_org_owner = org.owner == request.user
+            is_dept_head = department.head == request.user
+            if not (is_org_owner or is_dept_head):
+                from django.db.models import Q
+                projects = projects.filter(Q(owner=request.user) | Q(members=request.user)).distinct()
         serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
