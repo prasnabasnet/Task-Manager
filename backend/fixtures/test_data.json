@@ -185,39 +185,13 @@
     }
   },
   {
-    "model": "department.department",
-    "pk": 1,
-    "fields": {
-      "organization": 1,
-      "name": "Engineering",
-      "description": "Core software development and database administration team.",
-      "head": 2,
-      "members": [3, 5],
-      "created_at": "2026-07-08T12:09:30Z",
-      "updated_at": "2026-07-08T12:09:30Z"
-    }
-  },
-  {
-    "model": "department.department",
-    "pk": 2,
-    "fields": {
-      "organization": 2,
-      "name": "Creative Design",
-      "description": "UI/UX, mobile flow layouts, and graphics team.",
-      "head": 4,
-      "members": [6],
-      "created_at": "2026-07-08T12:09:45Z",
-      "updated_at": "2026-07-08T12:09:45Z"
-    }
-  },
-  {
     "model": "projects.project",
     "pk": 1,
     "fields": {
       "name": "Initech Website Redesign",
       "description": "Revamping Initech's marketing website in Django.",
       "owner": 2,
-      "department": 1,
+      "department": null,
       "created_at": "2026-07-08T12:10:00Z",
       "updated_at": "2026-07-08T12:10:00Z"
     }
@@ -229,7 +203,7 @@
       "name": "Soylent Mobile Application",
       "description": "Building the Soylent delivery app in React Native.",
       "owner": 4,
-      "department": 2,
+      "department": null,
       "created_at": "2026-07-08T12:11:00Z",
       "updated_at": "2026-07-08T12:11:00Z"
     }
@@ -241,7 +215,7 @@
       "name": "Database Migration Plan",
       "description": "Migrating production database from SQLite to PostgreSQL.",
       "owner": 1,
-      "department": 1,
+      "department": null,
       "created_at": "2026-07-08T12:12:00Z",
       "updated_at": "2026-07-08T12:12:00Z"
     }
