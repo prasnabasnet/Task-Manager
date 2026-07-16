@@ -1,7 +1,7 @@
 import os
 
-from apps.projects.middleware import TokenAuthMiddleware
 from apps.projects.routing import websocket_urlpatterns
+from channels.auth import TokenAuthMiddleware
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 
