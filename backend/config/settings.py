@@ -121,7 +121,7 @@ TEMPLATES = [
     },
 ]
 
-WASGI_APPLICATION = "config.asgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 # Redis
 CHANNEL_LAYERS = {
