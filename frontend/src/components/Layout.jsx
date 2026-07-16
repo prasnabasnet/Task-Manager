@@ -33,6 +33,12 @@ export default function Layout() {
           >
             Organizations
           </NavLink>
+          <NavLink
+            to="/profile"
+            className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+          >
+            Profile
+          </NavLink>
           {user?.role === 'ADMIN' && (
             <NavLink
               to="/users"
