@@ -1,18 +1,24 @@
 from django.contrib.auth import authenticate, get_user_model
-from rest_framework import generics, status, views
+from rest_framework import status, views, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from apps.users.serializers import UserDetailSerializer, UserRegisterSerializer
+from apps.users.serializers import (
+    ProfileUpdateSerializer,
+    UserDetailSerializer,
+    UserRegisterSerializer,
+)
 
 User = get_user_model()
 
 
-class RegisterView(generics.CreateAPIView):
+class RegisterView(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
+
+    http_method_names = ["post"]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -66,3 +72,13 @@ class MeView(views.APIView):
     def get(self, request):
         serializer = UserDetailSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        """Updates profile fields only. Email, username, password, role are untouchable here."""
+        profile = request.user.profile
+        serializer = ProfileUpdateSerializer(profile, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            UserDetailSerializer(request.user).data, status=status.HTTP_200_OK
+        )

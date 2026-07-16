@@ -13,14 +13,15 @@ class Role(models.TextChoices):
 class User(AbstractUser):
     objects = UserManager()
 
+    username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     role = models.CharField(
         max_length=15, choices=Role.choices, default=Role.TEAM_MEMBER
     )
-    username = models.CharField(max_length=150, unique=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username", "role"]
+    # REQUIRED_FIELDS = ["username", "role"]
+    REQUIRED_FIELDS = ["username"]
 
     @property
     def is_admin(self):

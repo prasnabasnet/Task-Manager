@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.select_related("profile").all()
     permission_classes = [IsAuthenticated, IsAdmin]
     http_method_names = ["get", "patch", "delete", "head", "options"]
 
