@@ -13,7 +13,9 @@ export default function Layout() {
     navigate('/login')
   }
 
-  const initials = (user?.first_name?.[0] || user?.email?.[0] || '?').toUpperCase()
+  const displayName = user?.profile?.display_name || user?.username || user?.email
+  const initials = (displayName?.[0] || '?').toUpperCase()
+  const avatarUrl = user?.profile?.avatar_url
 
   return (
     <div className="app-shell">
@@ -67,9 +69,18 @@ export default function Layout() {
 
         <div className="sidebar-footer">
           <div className="user-chip">
-            <span className="avatar">{initials}</span>
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                className="avatar"
+                style={{ objectFit: 'cover' }}
+              />
+            ) : (
+              <span className="avatar">{initials}</span>
+            )}
             <div className="user-meta">
-              <div className="user-name">{user?.username || user?.email}</div>
+              <div className="user-name">{displayName}</div>
               <div className="user-role">{user?.role}</div>
             </div>
           </div>
