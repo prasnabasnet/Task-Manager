@@ -1,6 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.filters import OrderingFilter, SearchFilter
 
 from apps.tasks.filters import TaskFilter
 from apps.tasks.models.task import Task
@@ -10,7 +11,7 @@ from apps.tasks.serializers.task import TaskSerializer
 
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend,OrderingFilter, SearchFilter]
     filterset_class = TaskFilter
 
     search_fields = ["title", "description"]
