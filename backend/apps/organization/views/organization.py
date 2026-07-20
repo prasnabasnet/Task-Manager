@@ -1,4 +1,3 @@
-from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
@@ -21,10 +20,6 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         if getattr(user, "is_admin", False):
             return Organization.objects.all()
         return (
-            Organization.objects.filter(
-                Q(memberships__user=user)
-                | Q(owner=user)
-                | Q(departments__projects__members=user)
-                | Q(departments__projects__owner=user)
-            )
+            Organization.objects.filter(memberships__user=user)
+            | Organization.objects.filter(owner=user)
         ).distinct()
