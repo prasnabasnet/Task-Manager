@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from apps.organization.models import Organization
 from apps.department.serializers import DepartmentSerializer
@@ -40,6 +41,19 @@ class DepartmentViewSet(viewsets.ModelViewSet):
         org = get_org(self.kwargs["oid"], self.request.user)
         serializer.save(organization=org)
 
+    @extend_schema(
+        methods=["GET"],
+        responses={200: ProjectSerializer(many=True)},
+        summary="List projects in a department",
+        description="Returns all projects associated with the specified department that the user has access to.",
+    )
+    @extend_schema(
+        methods=["POST"],
+        request=ProjectSerializer,
+        responses={201: ProjectSerializer},
+        summary="Create project in a department",
+        description="Creates a new project within the specified department. The department relationship is auto-injected.",
+    )
     @action(detail=True, methods=["get", "post"])
     def projects(self, request, oid=None, pk=None):
         department = self.get_object()

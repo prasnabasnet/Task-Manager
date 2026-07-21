@@ -1,11 +1,16 @@
 from django.contrib.auth import get_user_model
-from rest_framework import status, views
+from rest_framework import serializers, status, views
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from apps.projects.models import Project, ProjectMember
 from apps.projects.serializers import AddMemberSerializer, ProjectMemberSerializer
 
 User = get_user_model()
+
+
+class AddMemberResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
 
 
 class ProjectMemberListAddView(views.APIView):
@@ -15,6 +20,11 @@ class ProjectMemberListAddView(views.APIView):
         except Project.DoesNotExist:
             return None
 
+    @extend_schema(
+        responses={200: ProjectMemberSerializer(many=True)},
+        summary="List project members",
+        description="Returns all members of the specified project.",
+    )
     def get(self, request, pk):
         project = self.get_project(pk)
         if not project:
@@ -40,6 +50,12 @@ class ProjectMemberListAddView(views.APIView):
         serializer = ProjectMemberSerializer(members, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=AddMemberSerializer,
+        responses={201: AddMemberResponseSerializer},
+        summary="Add member to project",
+        description="Adds a user to a project's members list.",
+    )
     def post(self, request, pk):
         project = self.get_project(pk)
         if not project:
@@ -80,6 +96,11 @@ class ProjectMemberListAddView(views.APIView):
 
 
 class ProjectMemberRemoveView(views.APIView):
+    @extend_schema(
+        responses={204: None},
+        summary="Remove member from project",
+        description="Removes a user from a project's members list.",
+    )
     def delete(self, request, pk, uid):
         try:
             project = Project.objects.get(pk=pk)
