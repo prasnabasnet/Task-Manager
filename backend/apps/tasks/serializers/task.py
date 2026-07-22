@@ -9,8 +9,8 @@ User = get_user_model()
 
 class TaskSerializer(serializers.ModelSerializer):
     created_by = UserDetailSerializer(read_only=True)
-    assignees = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), many=True, required=False
+    assignee = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=False, allow_null=True
     )
     
 
@@ -23,7 +23,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "description",
             "status",
             "priority",
-            "assignees",
+            "assignee",
             "created_by",
             "due_date",
             "created_at",
@@ -33,12 +33,11 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data["created_by"] = self.context["request"].user
-        # DRF ManyToManyField save requires instance first, which ModelSerializer handles
         return super().create(validated_data)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["assignees"] = (
-            UserDetailSerializer(instance.assignees.all(), many=True).data
+        representation["assignee"] = (
+            UserDetailSerializer(instance.assignee).data if instance.assignee else None
         )
         return representation
