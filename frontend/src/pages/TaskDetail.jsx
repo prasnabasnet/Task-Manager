@@ -1,19 +1,17 @@
 import { useEffect, useState } from 'react'
-import { commentsApi, projectsApi, tasksApi } from '../api'
+import { projectsApi, tasksApi } from '../api'
 import ApiHint from '../components/ApiHint'
 import { ErrorBanner, Modal, PriorityBadge, StatusBadge } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
+import CommentsSection from '../components/CommentsSection'
 
 export default function TaskDetail({ taskId, onClose, onChanged }) {
   const { user } = useAuth()
   const [task, setTask] = useState(null)
-  const [comments, setComments] = useState([])
   const [members, setMembers] = useState([])
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [edit, setEdit] = useState(null)
-  const [commentBody, setCommentBody] = useState('')
-  const [replyTo, setReplyTo] = useState(null)
 
   const load = async () => {
     setError('')
@@ -25,14 +23,10 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
         description: t.description || '',
         status: t.status,
         priority: t.priority,
-        assignee_id: t.assignee?.id ?? '',
+        assignee_ids: t.assignees?.map((a) => a.id) || [],
         due_date: t.due_date || '',
       })
-      const [commentList, memberList] = await Promise.all([
-        commentsApi.list({ target_type: 'task', target_id: taskId }),
-        projectsApi.listMembers(t.project),
-      ])
-      setComments(Array.isArray(commentList) ? commentList : commentList.results || [])
+      const memberList = await projectsApi.listMembers(t.project)
       setMembers(Array.isArray(memberList) ? memberList : memberList.results || [])
     } catch (err) {
       setError(err.message)
@@ -54,7 +48,7 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
         status: edit.status,
         priority: edit.priority,
         due_date: edit.due_date || null,
-        assignee_id: edit.assignee_id === '' ? null : Number(edit.assignee_id),
+        assignees: edit.assignee_ids.map(Number),
       }
       await tasksApi.update(taskId, payload)
       await load()
@@ -77,35 +71,6 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
       setError(err.message)
     } finally {
       setBusy(false)
-    }
-  }
-
-  const postComment = async (e) => {
-    e.preventDefault()
-    if (!commentBody.trim()) return
-    setBusy(true)
-    setError('')
-    try {
-      const body = replyTo
-        ? { body: commentBody, parent: replyTo }
-        : { body: commentBody, target_type: 'task', target_id: Number(taskId) }
-      await commentsApi.create(body)
-      setCommentBody('')
-      setReplyTo(null)
-      await load()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  const deleteComment = async (id) => {
-    try {
-      await commentsApi.remove(id)
-      await load()
-    } catch (err) {
-      setError(err.message)
     }
   }
 
@@ -142,87 +107,7 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
             </label>
           </form>
 
-          <div className="section">
-            <h3>
-              Comments
-              <ApiHint
-                method="GET"
-                path={`/api/comments/?target_type=task&target_id=${taskId}`}
-              />
-            </h3>
-
-            <div className="comment-list">
-              {comments.length === 0 && <p className="muted">No comments yet.</p>}
-              {comments.map((c) => (
-                <div key={c.id} className="comment">
-                  <div className="comment-head">
-                    <strong>{c.author?.username || c.author?.email}</strong>
-                    <span className="muted small">
-                      {new Date(c.created_at).toLocaleString()}
-                    </span>
-                  </div>
-                  <p>{c.body}</p>
-                  <div className="row">
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => setReplyTo(c.id)}
-                    >
-                      Reply
-                    </button>
-                    {(user?.id === c.author?.id || user?.role === 'ADMIN') && (
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm danger"
-                        onClick={() => deleteComment(c.id)}
-                      >
-                        Delete
-                        <ApiHint method="DELETE" path={`/api/comments/${c.id}/`} />
-                      </button>
-                    )}
-                  </div>
-                  {c.replies?.map((r) => (
-                    <div key={r.id} className="comment reply">
-                      <div className="comment-head">
-                        <strong>{r.author?.username || r.author?.email}</strong>
-                        <span className="muted small">
-                          {new Date(r.created_at).toLocaleString()}
-                        </span>
-                      </div>
-                      <p>{r.body}</p>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-
-            <form onSubmit={postComment} className="stack comment-form">
-              {replyTo && (
-                <div className="row">
-                  <span className="muted small">Replying to comment #{replyTo}</span>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => setReplyTo(null)}
-                  >
-                    Cancel reply
-                  </button>
-                </div>
-              )}
-              <textarea
-                rows={3}
-                placeholder="Add a comment… Use @username to mention"
-                value={commentBody}
-                onChange={(e) => setCommentBody(e.target.value)}
-              />
-              <div className="row end">
-                <button type="submit" className="btn btn-primary btn-sm" disabled={busy}>
-                  Comment
-                  <ApiHint method="POST" path="/api/comments/" />
-                </button>
-              </div>
-            </form>
-          </div>
+          <CommentsSection targetType="task" targetId={taskId} />
         </div>
 
         <aside className="issue-side">
@@ -256,19 +141,34 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
           </div>
 
           <div className="side-block">
-            <div className="muted small">Assignee</div>
-            <select
-              form="issue-form"
-              value={edit.assignee_id}
-              onChange={(e) => setEdit((f) => ({ ...f, assignee_id: e.target.value }))}
-            >
-              <option value="">Unassigned</option>
-              {members.map((m) => (
-                <option key={m.user_id} value={m.user_id}>
-                  {m.email}
-                </option>
-              ))}
-            </select>
+            <div className="muted small">Assignees</div>
+            <div className="assignees-list" style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '3px', padding: '8px', background: '#fff' }}>
+              {members.length === 0 ? (
+                <span className="muted">No project members</span>
+              ) : (
+                members.map((m) => {
+                  const isChecked = edit.assignee_ids.includes(m.user_id)
+                  return (
+                    <label key={m.user_id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', cursor: 'pointer', fontWeight: 'normal' }}>
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const checked = e.target.checked
+                          setEdit((f) => {
+                            const newIds = checked
+                              ? [...f.assignee_ids, m.user_id]
+                              : f.assignee_ids.filter((id) => id !== m.user_id)
+                            return { ...f, assignee_ids: newIds }
+                          })
+                        }}
+                      />
+                      <span>{m.email}</span>
+                    </label>
+                  )
+                })
+              )}
+            </div>
             <ApiHint method="GET" path={`/api/projects/${task.project}/members/`} />
           </div>
 

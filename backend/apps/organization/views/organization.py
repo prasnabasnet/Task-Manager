@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from apps.organization.models import Organization
-from apps.organization.permissions import IsAdminOrOwner
+from apps.organization.permissions import CanCreateOrganization, IsAdminOrOwner
 from apps.organization.serializers import OrganizationSerializer
 
 
@@ -13,6 +13,8 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ["update", "partial_update", "destroy"]:
             return [IsAdminOrOwner()]
+        if self.action == "create":
+            return [CanCreateOrganization()]
         return [IsAuthenticated()]
 
     def get_queryset(self):

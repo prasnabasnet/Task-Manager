@@ -9,8 +9,8 @@ User = get_user_model()
 
 class TaskSerializer(serializers.ModelSerializer):
     created_by = UserDetailSerializer(read_only=True)
-    assignee = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=False, allow_null=True
+    assignees = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), many=True, required=False
     )
     
 
@@ -23,7 +23,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "description",
             "status",
             "priority",
-            "assignee",
+            "assignees",
             "created_by",
             "due_date",
             "created_at",
@@ -37,7 +37,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["assignee"] = (
-            UserDetailSerializer(instance.assignee).data if instance.assignee else None
+        representation["assignees"] = (
+            UserDetailSerializer(instance.assignees.all(), many=True).data
         )
         return representation

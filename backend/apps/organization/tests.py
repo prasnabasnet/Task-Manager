@@ -67,11 +67,17 @@ class OrganizationAPITests(TestCase):
         self.assertEqual(response.data["slug"], "beta-industries")
 
     def test_create_organization_sets_owner_to_requester(self):
-        client = self.get_auth_client(self.member)
+        client = self.get_auth_client(self.owner)
         data = {"name": "New Org"}
         response = client.post(self.list_url, data, format="json")
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data["owner"]["email"], self.member.email)
+        self.assertEqual(response.data["owner"]["email"], self.owner.email)
+
+    def test_create_organization_by_team_member_forbidden(self):
+        client = self.get_auth_client(self.member)
+        data = {"name": "Forbidden Org"}
+        response = client.post(self.list_url, data, format="json")
+        self.assertEqual(response.status_code, 403)
 
     def test_create_organization_unauthenticated_denied(self):
         response = self.client.post(
@@ -80,7 +86,7 @@ class OrganizationAPITests(TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_create_organization_duplicate_name_rejected(self):
-        client = self.get_auth_client(self.member)
+        client = self.get_auth_client(self.owner)
         response = client.post(self.list_url, {"name": "Acme Corp"}, format="json")
         self.assertEqual(response.status_code, 400)
 

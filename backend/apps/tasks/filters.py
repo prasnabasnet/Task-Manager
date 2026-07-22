@@ -16,5 +16,5 @@ class TaskFilter(django_filters.FilterSet):
             "project",
             "status",
             "priority",
-            "assignee",
+            "assignees",
         ]

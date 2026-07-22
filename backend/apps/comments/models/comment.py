@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 
-class Comment(models.Model):
+class Comment(models.Model): #check
     body = models.TextField()
     mentions = models.ManyToManyField(
         settings.AUTH_USER_MODEL, blank=True, related_name="mentioned_comments"

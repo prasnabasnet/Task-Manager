@@ -9,6 +9,7 @@ import ProjectSettings from './pages/ProjectSettings'
 import Projects from './pages/Projects'
 import Register from './pages/Register'
 import Users from './pages/Users'
+import Profile from './pages/Profile'
 
 function Protected({ children }) {
   const { user, loading } = useAuth()
@@ -34,6 +35,7 @@ export default function App() {
         <Route index element={<Navigate to="/organizations" replace />} />
         <Route path="organizations" element={<Organizations />} />
         <Route path="users" element={<Users />} />
+        <Route path="profile" element={<Profile />} />
         <Route path="projects/:projectId/board" element={<Board />} />
         <Route path="projects/:projectId/backlog" element={<Backlog />} />
         <Route path="projects/:projectId/settings" element={<ProjectSettings />} />

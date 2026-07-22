@@ -1,12 +1,15 @@
+import { useState } from 'react'
 import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import ApiHint from './ApiHint'
+import CommentsSection from './CommentsSection'
 import './Layout.css'
 
 export default function Layout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const { projectId } = useParams()
+  const [showProjectComments, setShowProjectComments] = useState(false)
 
   const handleLogout = async () => {
     await logout()
@@ -32,6 +35,12 @@ export default function Layout() {
             className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
           >
             Organizations
+          </NavLink>
+          <NavLink
+            to="/profile"
+            className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+          >
+            Profile
           </NavLink>
           {user?.role === 'ADMIN' && (
             <NavLink
@@ -63,6 +72,22 @@ export default function Layout() {
               >
                 Settings
               </NavLink>
+              <button
+                type="button"
+                className={showProjectComments ? 'nav-item active' : 'nav-item'}
+                onClick={() => setShowProjectComments(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  width: '100%',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  padding: '8px 10px',
+                  display: 'block'
+                }}
+              >
+                Comments
+              </button>
             </>
           )}
         </nav>
@@ -102,6 +127,26 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      {showProjectComments && (
+        <div className="drawer-backdrop" onClick={() => setShowProjectComments(false)}>
+          <div className="drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="drawer-header">
+              <h2>Project Comments</h2>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setShowProjectComments(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="drawer-body">
+              <CommentsSection targetType="project" targetId={projectId} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
