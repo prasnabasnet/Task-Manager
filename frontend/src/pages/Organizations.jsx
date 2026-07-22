@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { departmentsApi, orgsApi } from '../api'
 import ApiHint from '../components/ApiHint'
 import { EmptyState, ErrorBanner, Modal } from '../components/ui'
+import { useAuth } from '../context/AuthContext'
+import CommentsSection from '../components/CommentsSection'
 
 export default function Organizations() {
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [orgs, setOrgs] = useState([])
   const [selected, setSelected] = useState(null)
@@ -155,10 +158,12 @@ export default function Organizations() {
             <ApiHint method="GET" path="/api/organizations/" />
           </p>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => setShowOrg(true)}>
-          Create organization
-          <ApiHint method="POST" path="/api/organizations/" />
-        </button>
+        {user?.role !== 'TM' && (
+          <button type="button" className="btn btn-primary" onClick={() => setShowOrg(true)}>
+            Create organization
+            <ApiHint method="POST" path="/api/organizations/" />
+          </button>
+        )}
       </div>
 
       <ErrorBanner message={error} onDismiss={() => setError('')} />
@@ -192,7 +197,8 @@ export default function Organizations() {
 
         <section className="panel">
           {selected ? (
-            selectedDept ? (
+            <>
+              {selectedDept ? (
               <>
                 <div className="page-header compact">
                   <div>
@@ -354,7 +360,9 @@ export default function Organizations() {
                   </table>
                 )}
               </>
-            )
+            )}
+            <CommentsSection targetType="organization" targetId={selected.id} />
+          </>
           ) : (
             <EmptyState title="Select an organization" subtitle="Details and departments appear here." />
           )}

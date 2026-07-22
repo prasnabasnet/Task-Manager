@@ -104,7 +104,11 @@ export default function Backlog() {
                 <td>
                   <PriorityBadge priority={t.priority} />
                 </td>
-                <td>{t.assignee?.email || 'Unassigned'}</td>
+                <td>
+                  {t.assignees && t.assignees.length > 0
+                    ? t.assignees.map((a) => a.email).join(', ')
+                    : 'Unassigned'}
+                </td>
               </tr>
             ))}
           </tbody>

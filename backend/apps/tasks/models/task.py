@@ -21,7 +21,7 @@ class Task(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.TODO)
     priority = models.CharField(max_length=20, choices=Priority.choices, default=Priority.MEDIUM)
 
-    assignee = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
+    assignees = models.ManyToManyField('users.User', related_name='assigned_tasks', blank=True)
 
     created_by = models.ForeignKey('users.User', on_delete=models.PROTECT, related_name='created_tasks')
 

@@ -20,7 +20,7 @@ class CanModifyTask(BasePermission):
             return True
         if obj.created_by_id == request.user.id:
             return True
-        if obj.assignee_id == request.user.id:
+        if obj.assignees.filter(id=request.user.id).exists():
             return True
         return False
 

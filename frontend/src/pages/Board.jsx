@@ -150,11 +150,13 @@ export default function Board() {
                       <div className="issue-title">{task.title}</div>
                       <div className="issue-meta">
                         <PriorityBadge priority={task.priority} />
-                        {task.assignee && (
-                          <span className="assignee-chip" title={task.assignee.email}>
-                            {(task.assignee.first_name?.[0] || task.assignee.email?.[0] || '?').toUpperCase()}
-                          </span>
-                        )}
+                        <div style={{ display: 'flex', gap: '2px' }}>
+                          {task.assignees?.map((a) => (
+                            <span key={a.id} className="assignee-chip" title={a.email}>
+                              {(a.first_name?.[0] || a.email?.[0] || '?').toUpperCase()}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </button>
                   ))}
