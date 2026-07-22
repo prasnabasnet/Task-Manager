@@ -9,3 +9,13 @@ class IsAdminOrOwner(BasePermission):
         if getattr(request.user, "is_admin", False):
             return True
         return obj.owner == request.user
+
+
+class CanCreateOrganization(BasePermission):
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role != "TM"
+        )
+

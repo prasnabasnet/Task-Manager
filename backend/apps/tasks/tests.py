@@ -100,18 +100,18 @@ class TaskAPITests(TestCase):
         data = {
             "project": self.project.id,
             "title": "Assigned Task",
-            "assignee_id": self.member.id,
+            "assignees": [self.member.id],
         }
         response = client.post(self.list_url, data, format="json")
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data["assignee"]["email"], self.member.email)
+        self.assertEqual(response.data["assignees"][0]["email"], self.member.email)
 
     def test_create_task_with_invalid_assignee_rejected(self):
         client = self.get_auth_client(self.owner)
         data = {
             "project": self.project.id,
             "title": "Bad Assignee",
-            "assignee_id": 999999,
+            "assignees": [999999],
         }
         response = client.post(self.list_url, data, format="json")
         self.assertEqual(response.status_code, 400)
@@ -172,8 +172,7 @@ class TaskAPITests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_update_by_assignee_success(self):
-        self.task.assignee = self.other_member
-        self.task.save()
+        self.task.assignees.add(self.other_member)
         client = self.get_auth_client(self.other_member)
         response = client.patch(self.detail_url, {"status": "DONE"}, format="json")
         self.assertEqual(response.status_code, 200)
@@ -236,14 +235,14 @@ class TaskAPITests(TestCase):
         self.assertNotIn("Existing Task", titles)
 
     def test_filter_by_assignee(self):
-        Task.objects.create(
+        task = Task.objects.create(
             project=self.project,
             title="Assigned To Other",
             created_by=self.owner,
-            assignee=self.other_member,
         )
+        task.assignees.add(self.other_member)
         client = self.get_auth_client(self.owner)
-        response = client.get(self.list_url, {"assignee": self.other_member.id})
+        response = client.get(self.list_url, {"assignees": self.other_member.id})
         titles = [t["title"] for t in response.data]
         self.assertIn("Assigned To Other", titles)
         self.assertNotIn("Existing Task", titles)
