@@ -1,16 +1,14 @@
-from django.contrib.auth import get_user_model
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.users.permissions import IsAdmin
 from apps.users.serializers import UserDetailSerializer, UserListSerializer
-
-User = get_user_model()
+from apps.users.service import UserService
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.select_related("profile").all()
+    queryset = UserService.get_all_users()
     permission_classes = [IsAuthenticated, IsAdmin]
     http_method_names = ["get", "patch", "delete", "head", "options"]
 
@@ -21,6 +19,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         user = self.get_object()
-        user.is_active = False
-        user.save(update_fields=["is_active"])
+        UserService.deactivate_user(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
