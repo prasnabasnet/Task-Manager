@@ -103,6 +103,32 @@ class CommentAPITests(TestCase):
         self.assertEqual(comment.mentions.count(), 1)
         self.assertEqual(response.data["mentions"][0]["username"], "pm_user")
 
+    def test_post_comment_with_punctuation_mention(self):
+        client = self.get_auth_client(self.dev_user)
+        data = {
+            "body": "Hey @pm_user, can you check this out?",
+            "parent": None,
+            "target_type": "task",
+            "target_id": self.task.id,
+        }
+        response = client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, 201)
+        comment = Comment.objects.get(id=response.data["id"])
+        self.assertIn(self.pm_user, comment.mentions.all())
+
+    def test_post_comment_email_not_parsed_as_mention(self):
+        client = self.get_auth_client(self.dev_user)
+        data = {
+            "body": "Contact me at dev@example.com for details",
+            "parent": None,
+            "target_type": "task",
+            "target_id": self.task.id,
+        }
+        response = client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, 201)
+        comment = Comment.objects.get(id=response.data["id"])
+        self.assertEqual(comment.mentions.count(), 0)
+
     def test_threaded_replies(self):
         client = self.get_auth_client(self.dev_user)
         task_ct = ContentType.objects.get_for_model(self.task)
