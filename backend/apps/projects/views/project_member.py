@@ -1,10 +1,12 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status, views
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
 
 from apps.projects.models import Project, ProjectMember
 from apps.projects.serializers import AddMemberSerializer, ProjectMemberSerializer
+from apps.projects.services import AddProjectMemberService, RemoveProjectMemberService
 
 User = get_user_model()
 
@@ -64,33 +66,21 @@ class ProjectMemberListAddView(views.APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        if request.user.role != "ADMIN" and project.owner != request.user:
+        try:
+            membership = AddProjectMemberService.execute(
+                request.data, project=project, requesting_user=request.user
+            )
+        except ValidationError as e:
+            message = e.message_dict if hasattr(e, "message_dict") else str(e)
             return Response(
-                {
-                    "error": "forbidden",
-                    "message": "Only the project owner or admin can add members.",
-                },
-                status=status.HTTP_403_FORBIDDEN,
+                {"error": "invalid", "message": message},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        serializer = AddMemberSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user_id = serializer.validated_data["user_id"]
-        user = User.objects.get(id=user_id)
-
-        if ProjectMember.objects.filter(project=project, user=user).exists():
-            return Response(
-                {
-                    "error": "conflict",
-                    "message": "User is already a member of this project.",
-                },
-                status=status.HTTP_409_CONFLICT,
-            )
-
-        ProjectMember.objects.create(project=project, user=user)
         return Response(
-            {"message": f"{user.email} added to {project.name} successfully."},
+            {
+                "message": f"{membership.user.email} added to {project.name} successfully."
+            },
             status=status.HTTP_201_CREATED,
         )
 
@@ -110,25 +100,15 @@ class ProjectMemberRemoveView(views.APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        if request.user.role != "ADMIN" and project.owner != request.user:
-            return Response(
-                {
-                    "error": "forbidden",
-                    "message": "Only the project owner or admin can remove members.",
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
         try:
-            membership = ProjectMember.objects.get(project=project, user__id=uid)
-        except ProjectMember.DoesNotExist:
+            RemoveProjectMemberService.execute(
+                {"user_id": uid}, project=project, requesting_user=request.user
+            )
+        except ValidationError as e:
+            message = e.message_dict if hasattr(e, "message_dict") else str(e)
             return Response(
-                {
-                    "error": "not_found",
-                    "message": "User is not a member of this project.",
-                },
-                status=status.HTTP_404_NOT_FOUND,
+                {"error": "invalid", "message": message},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        membership.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

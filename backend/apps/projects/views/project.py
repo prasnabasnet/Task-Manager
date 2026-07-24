@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from apps.projects.filters import ProjectFilter
 from apps.projects.models import Project
@@ -11,6 +13,11 @@ from apps.projects.permissions import (
     IsProjectOwnerOrAdmin,
 )
 from apps.projects.serializers import ProjectSerializer
+from apps.projects.services import (
+    CreateProjectService,
+    DeleteProjectService,
+    UpdateProjectService,
+)
 
 User = get_user_model()
 
@@ -38,4 +45,26 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return [IsProjectMemberOrAdmin()]
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        try:
+            project = CreateProjectService.execute(
+                self.request.data, user=self.request.user
+            )
+        except ValidationError as e:
+            raise DRFValidationError(
+                e.message_dict if hasattr(e, "message_dict") else str(e)
+            )
+        serializer.instance = project
+
+    def perform_update(self, serializer):
+        try:
+            project = UpdateProjectService.execute(
+                self.request.data, project=serializer.instance
+            )
+        except ValidationError as e:
+            raise DRFValidationError(
+                e.message_dict if hasattr(e, "message_dict") else str(e)
+            )
+        serializer.instance = project
+
+    def perform_destroy(self, instance):
+        DeleteProjectService.execute({}, project=instance)
