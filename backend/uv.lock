@@ -337,6 +337,19 @@ wheels = [
 ]
 
 [[package]]
+name = "django-service-objects"
+version = "0.7.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5d/41/86414421c90af067a9ca232bfb86c486ed1dcc7a9da4f5925ee85189252d/django-service-objects-0.7.1.tar.gz", hash = "sha256:9c14c383149f7369c2306439a8b1fec3d6c85c129e8e22479c131efab1530eb1", size = 9759, upload-time = "2022-02-24T09:04:43.814Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/56/8d/290d9cdf0954da637f723717b2f2debd354d3d3cf7b251c6357f172a1f80/django_service_objects-0.7.1-py3-none-any.whl", hash = "sha256:c13961062f35c68d8f59a98f75e970636aa8d4fc7e9dad85d222a39c13151449", size = 11075, upload-time = "2022-02-24T09:04:42.382Z" },
+]
+
+[[package]]
 name = "django-stubs"
 version = "6.0.6"
 source = { registry = "https://pypi.org/simple" }
@@ -867,6 +880,15 @@ wheels = [
 ]
 
 [[package]]
+name = "six"
+version = "1.17.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
+]
+
+[[package]]
 name = "sqlparse"
 version = "0.5.5"
 source = { registry = "https://pypi.org/simple" }
@@ -887,6 +909,7 @@ dependencies = [
     { name = "django-cors-headers" },
     { name = "django-environ" },
     { name = "django-filter" },
+    { name = "django-service-objects" },
     { name = "djangorestframework" },
     { name = "drf-spectacular" },
     { name = "psycopg2-binary" },
@@ -911,6 +934,7 @@ requires-dist = [
     { name = "django-cors-headers", specifier = ">=4.9.0" },
     { name = "django-environ", specifier = ">=0.14.0" },
     { name = "django-filter", specifier = ">=25.2" },
+    { name = "django-service-objects", specifier = ">=0.7.1" },
     { name = "djangorestframework", specifier = ">=3.17.1" },
     { name = "drf-spectacular", specifier = ">=0.30.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.12" },
