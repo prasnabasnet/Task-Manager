@@ -1,28 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 
-from apps.organization.models import Organization
 from apps.department.serializers import DepartmentSerializer
 from apps.projects.serializers import ProjectSerializer
 from apps.users.permissions import IsAdminOrOrgOwner
-
-
-def get_org(pk, user):
-    try:
-        org = Organization.objects.get(pk=pk)
-    except Organization.DoesNotExist:
-        raise NotFound("Organization not found.")
-
-    if not user.is_admin:
-        is_owner = org.owner == user
-        is_member = org.memberships.filter(user=user).exists()
-        if not (is_owner or is_member):
-            raise PermissionDenied("You are not a member of this organization.")
-    return org
+from apps.department.services import DepartmentService
 
 
 class DepartmentViewSet(viewsets.ModelViewSet):
@@ -34,12 +19,10 @@ class DepartmentViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated()]
 
     def get_queryset(self):
-        org = get_org(self.kwargs["oid"], self.request.user)
-        return org.departments.all()
+        return DepartmentService.get_departments(self.kwargs["oid"], self.request.user)
 
     def perform_create(self, serializer):
-        org = get_org(self.kwargs["oid"], self.request.user)
-        serializer.save(organization=org)
+        DepartmentService.create_department(self.kwargs["oid"], self.request.user, serializer)
 
     @extend_schema(
         methods=["GET"],
@@ -58,19 +41,15 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     def projects(self, request, oid=None, pk=None):
         department = self.get_object()
         if request.method == "POST":
-            if not (request.user.is_admin or request.user.role == "PM"):
-                raise PermissionDenied("Only admins and project managers can create projects.")
-            
-            data = request.data.copy()
-            data["department"] = department.pk
-            serializer = ProjectSerializer(
-                data=data,
-                context={"request": request}
+            data = DepartmentService.create_project(
+                department=department,
+                user=request.user,
+                data=request.data,
+                request=request
             )
-            serializer.is_valid(raise_exception=True)
-            serializer.save(owner=request.user)
-            return Response(serializer.data, status=201)
+            return Response(data, status=201)
 
-        projects = department.projects.all()
+        projects = DepartmentService.get_department_projects(department)
         serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
+
