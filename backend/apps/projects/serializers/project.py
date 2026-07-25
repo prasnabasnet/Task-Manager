@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from apps.projects.models import Project
 from apps.department.models import Department
+from apps.projects.models import Project
 
 User = get_user_model()
 
@@ -55,4 +55,4 @@ class ProjectSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "You must belong to the organization of this department to create/assign a project in it."
             )
-        return value
+            return value

@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status, views
 from rest_framework.response import Response
+from service_objects.errors import InvalidInputsError
 
 from apps.projects.models import Project, ProjectMember
 from apps.projects.serializers import AddMemberSerializer, ProjectMemberSerializer
@@ -66,14 +66,16 @@ class ProjectMemberListAddView(views.APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        inputs = {
+            "project": project,
+            "requesting_user": request.user,
+            "user_id": request.data.get("user_id"),
+        }
         try:
-            membership = AddProjectMemberService.execute(
-                request.data, project=project, requesting_user=request.user
-            )
-        except ValidationError as e:
-            message = e.message_dict if hasattr(e, "message_dict") else str(e)
+            membership = AddProjectMemberService.execute(inputs)
+        except InvalidInputsError as e:
             return Response(
-                {"error": "invalid", "message": message},
+                {"error": "invalid", "message": e.errors},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -100,14 +102,16 @@ class ProjectMemberRemoveView(views.APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        inputs = {
+            "project": project,
+            "requesting_user": request.user,
+            "user_id": uid,
+        }
         try:
-            RemoveProjectMemberService.execute(
-                {"user_id": uid}, project=project, requesting_user=request.user
-            )
-        except ValidationError as e:
-            message = e.message_dict if hasattr(e, "message_dict") else str(e)
+            RemoveProjectMemberService.execute(inputs)
+        except InvalidInputsError as e:
             return Response(
-                {"error": "invalid", "message": message},
+                {"error": "invalid", "message": e.errors},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

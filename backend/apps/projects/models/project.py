@@ -21,8 +21,6 @@ class Project(models.Model):
         on_delete=models.CASCADE,
         related_name="projects",
         help_text="The department this project belongs to.",
-        null=True,
-        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
