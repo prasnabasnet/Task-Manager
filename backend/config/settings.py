@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "service_objects",
     # my apps
     "channels",
+    "apps.common",
     "apps.users",
     "apps.projects",
     "apps.tasks",
