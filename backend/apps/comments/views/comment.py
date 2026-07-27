@@ -3,9 +3,8 @@ from rest_framework import permissions, viewsets
 from apps.comments.models import Comment
 from apps.comments.permissions import IsCommentAuthorOrAdmin, IsProjectMember
 from apps.comments.serializers import CommentSerializer
-from apps.comments.services import CommentService
-
-
+from apps.comments.services import GetCommentsService, CreateCommentService
+from apps.common.services import BaseService
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
@@ -24,8 +23,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         if self.action in ["retrieve", "update", "partial_update", "destroy"]:
             return queryset
 
-        return CommentService.get_comments(self.request, self, queryset)
+        return GetCommentsService.execute(self.request, self, queryset)
 
     def perform_create(self, serializer):
-        CommentService.create_comment(self.request, self, serializer)
+        CreateCommentService.execute(self.request, self, serializer)
 
