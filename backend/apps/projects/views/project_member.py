@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status, views
 from rest_framework.response import Response
-from service_objects.errors import InvalidInputsError
 
 from apps.projects.models import Project, ProjectMember
 from apps.projects.serializers import AddMemberSerializer, ProjectMemberSerializer
@@ -66,18 +65,11 @@ class ProjectMemberListAddView(views.APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        inputs = {
-            "project": project,
-            "requesting_user": request.user,
-            "user_id": request.data.get("user_id"),
-        }
-        try:
-            membership = AddProjectMemberService.execute(inputs)
-        except InvalidInputsError as e:
-            return Response(
-                {"error": "invalid", "message": e.errors},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        membership = AddProjectMemberService.execute(
+            project=project,
+            requesting_user=request.user,
+            user_id=request.data.get("user_id"),
+        )
 
         return Response(
             {
@@ -102,17 +94,9 @@ class ProjectMemberRemoveView(views.APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        inputs = {
-            "project": project,
-            "requesting_user": request.user,
-            "user_id": uid,
-        }
-        try:
-            RemoveProjectMemberService.execute(inputs)
-        except InvalidInputsError as e:
-            return Response(
-                {"error": "invalid", "message": e.errors},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
+        RemoveProjectMemberService.execute(
+            project=project,
+            requesting_user=request.user,
+            user_id=uid,
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)

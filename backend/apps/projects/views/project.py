@@ -2,8 +2,6 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.exceptions import ValidationError as DRFValidationError
-from service_objects.errors import InvalidInputsError
 
 from apps.projects.filters import ProjectFilter
 from apps.projects.models import Project
@@ -45,20 +43,22 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return [IsProjectMemberOrAdmin()]
 
     def perform_create(self, serializer):
-        inputs = {**self.request.data, "user": self.request.user}
-        try:
-            project = CreateProjectService.execute(inputs)
-        except InvalidInputsError as e:
-            raise DRFValidationError(e.errors)
+        project = CreateProjectService.execute(
+            user=self.request.user,
+            name=self.request.data.get("name"),
+            description=self.request.data.get("description", ""),
+            department=self.request.data.get("department"),
+        )
         serializer.instance = project
 
     def perform_update(self, serializer):
-        inputs = {**self.request.data, "project": serializer.instance}
-        try:
-            project = UpdateProjectService.execute(inputs)
-        except InvalidInputsError as e:
-            raise DRFValidationError(e.errors)
+        project = UpdateProjectService.execute(
+            project=serializer.instance,
+            name=self.request.data.get("name"),
+            description=self.request.data.get("description"),
+            department=self.request.data.get("department"),
+        )
         serializer.instance = project
 
     def perform_destroy(self, instance):
-        DeleteProjectService.execute({"project": instance})
+        DeleteProjectService.execute(project=instance)
