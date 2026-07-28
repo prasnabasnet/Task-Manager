@@ -6,6 +6,7 @@ from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
 from django.db import models, transaction
 from rest_framework.exceptions import (
     APIException,
+    AuthenticationFailed,
     NotFound,
     ValidationError,
 )
@@ -58,6 +59,7 @@ class BaseService:
             DRFPermissionDenied,
             DjangoPermissionDenied,
             ObjectDoesNotExist,
+            AuthenticationFailed,
         ):
             raise
         except Exception as exc:
@@ -75,24 +77,19 @@ class BaseService:
     def log_info(self, message: str) -> None:
         logger.info(f"[{self.__class__.__name__}] {message}")
 
-    def get_object(self, model: Type[models.Model], **filters: Any) -> Any:
+    def get_object(self, model_cls: Type[models.Model], **filters: Any) -> Any:
         try:
-            return model.objects.get(**filters)
-        except model.DoesNotExist:
-            raise NotFound(f"{model.__name__} not found.")
+            return model_cls.objects.get(**filters)
+        except model_cls.DoesNotExist:
+            raise NotFound(f"{model_cls.__name__} not found.")
 
     def get_object_or_none(
-        self, model: Type[models.Model], **filters: Any
+        self, model_cls: Type[models.Model], **filters: Any
     ) -> Optional[Any]:
         try:
-            return model.objects.get(**filters)
-        except model.DoesNotExist:
+            return model_cls.objects.get(**filters)
+        except model_cls.DoesNotExist:
             return None
-
-    def get_queryset(
-        self, model: Type[models.Model], **filters: Any
-    ) -> models.QuerySet:
-        return model.objects.filter(**filters)
 
     def check_permission(
         self, condition: bool, message: str = "Permission denied."
@@ -107,24 +104,6 @@ class BaseService:
         serializer.is_valid(raise_exception=True)
         return serializer
 
-    def create_object(self, serializer: Any, **extra_fields: Any) -> Any:
-        return serializer.save(**extra_fields)
-
-    def update_object(
-        self, instance: models.Model, data: Dict[str, Any], serializer_class: Any
-    ) -> Any:
-        serializer = serializer_class(instance, data=data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        updated_instance = serializer.save()
-        updated_instance.refresh_from_db()
-        return updated_instance
-
-    def delete_object(self, instance: models.Model) -> None:
-        try:
-            instance.delete()
-        except Exception as exc:
-            self.log_error(self.__class__.__name__, exc)
-            raise APIException("Failed to delete the object.")
-
     def log_warning(self, message: str) -> None:
         logger.warning(f"[{self.__class__.__name__}] {message}")
+
