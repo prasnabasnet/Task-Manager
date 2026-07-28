@@ -3,8 +3,9 @@ from rest_framework import permissions, viewsets
 from apps.comments.models import Comment
 from apps.comments.permissions import IsCommentAuthorOrAdmin, IsProjectMember
 from apps.comments.serializers import CommentSerializer
-from apps.comments.services import GetCommentsService, CreateCommentService
-from apps.common.services import BaseService
+from apps.comments.services import CreateCommentService, GetCommentsService
+
+
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
@@ -27,4 +28,3 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         CreateCommentService.execute(self.request, self, serializer)
-
