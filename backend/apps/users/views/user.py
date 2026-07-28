@@ -1,15 +1,21 @@
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status, views, viewsets
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
 
 from apps.users.serializers import (
     ProfileUpdateSerializer,
     UserDetailSerializer,
     UserRegisterSerializer,
 )
-from apps.users.service import UserService
+from apps.users.services import (
+    AuthenticateUserService,
+    LogoutUserService,
+    RegisterUserService,
+    UpdateProfileService,
+)
 
 User = get_user_model()
 
@@ -36,7 +42,7 @@ class RegisterView(viewsets.ModelViewSet):
     http_method_names = ["post"]
 
     def create(self, request, *args, **kwargs):
-        user, token = UserService.register_user(request.data)
+        user, token = RegisterUserService.execute(data=request.data)
         return Response(
             {"user": UserDetailSerializer(user).data, "token": token.key},
             status=status.HTTP_201_CREATED,
@@ -55,18 +61,21 @@ class LoginView(views.APIView):
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
-        (result, error) = UserService.authenticate_user(
-            email, password, request=request
-        )
-        if error:
-            status_code = (
-                status.HTTP_400_BAD_REQUEST
-                if "required" in error
-                else status.HTTP_401_UNAUTHORIZED
+        try:
+            user, token = AuthenticateUserService.execute(
+                email=email, password=password, request=request
             )
-            return Response({"error": error}, status=status_code)
+        except ValidationError:
+            return Response(
+                {"error": "Email and password are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid email or password."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
-        user, token = result
         return Response(
             {"token": token.key, "user": UserDetailSerializer(user).data},
             status=status.HTTP_200_OK,
@@ -83,7 +92,7 @@ class LogoutView(views.APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        UserService.logout_user(request.user)
+        LogoutUserService.execute(user=request.user)
         return Response(
             {"message": "Successfully logged out."}, status=status.HTTP_200_OK
         )
@@ -110,8 +119,5 @@ class MeView(views.APIView):
     )
     def patch(self, request):
         """Updates profile fields only. Email, username, password, role are untouchable here."""
-        user = UserService.update_profile(request.user, request.data)
-        return Response(
-            UserDetailSerializer(user).data, status=status.HTTP_200_OK
-        )
-
+        user = UpdateProfileService.execute(user=request.user, data=request.data)
+        return Response(UserDetailSerializer(user).data, status=status.HTTP_200_OK)

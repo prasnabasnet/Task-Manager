@@ -4,11 +4,11 @@ from rest_framework.response import Response
 
 from apps.users.permissions import IsAdmin
 from apps.users.serializers import UserDetailSerializer, UserListSerializer
-from apps.users.service import UserService
+from apps.users.services import DeactivateUserService, GetAllUsersService
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = UserService.get_all_users()
+    queryset = GetAllUsersService.execute()
     permission_classes = [IsAuthenticated, IsAdmin]
     http_method_names = ["get", "patch", "delete", "head", "options"]
 
@@ -19,6 +19,5 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         user = self.get_object()
-        UserService.deactivate_user(user)
+        DeactivateUserService.execute(user=user)
         return Response(status=status.HTTP_204_NO_CONTENT)
-

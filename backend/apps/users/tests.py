@@ -278,40 +278,37 @@ class ProfileAPITestCase(TestCase):
 
 class UserServiceTestCase(TestCase):
     def test_service_register_user(self):
-        from apps.users.service import UserService
+        from apps.users.services import RegisterUserService
 
         data = {
             "email": "serviceuser@example.com",
             "username": "serviceuser",
             "password": "ServicePass123",
         }
-        user, token = UserService.register_user(data)
+        user, token = RegisterUserService.execute(data=data)
         self.assertEqual(user.email, "serviceuser@example.com")
         self.assertIsNotNone(token.key)
 
     def test_service_authenticate_user(self):
-        from apps.users.service import UserService
+        from apps.users.services import AuthenticateUserService
 
         User.objects.create_user(
             email="authservice@example.com",
             username="authservice",
             password="Password123",
         )
-        (result, error) = UserService.authenticate_user(
-            "authservice@example.com", "Password123"
+        user, token = AuthenticateUserService.execute(
+            email="authservice@example.com", password="Password123"
         )
-        self.assertIsNone(error)
-        user, token = result
         self.assertEqual(user.email, "authservice@example.com")
         self.assertIsNotNone(token.key)
 
     def test_service_deactivate_user(self):
-        from apps.users.service import UserService
+        from apps.users.services import DeactivateUserService
 
         user = User.objects.create_user(
             email="deact@example.com", username="deactuser", password="Password123"
         )
-        UserService.deactivate_user(user)
+        DeactivateUserService.execute(user=user)
         user.refresh_from_db()
         self.assertFalse(user.is_active)
-
