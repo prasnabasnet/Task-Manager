@@ -9,4 +9,4 @@ router.register(r"", DepartmentViewSet, basename="department")
 
 urlpatterns = [
     path("", include(router.urls)),
-]
+] 
