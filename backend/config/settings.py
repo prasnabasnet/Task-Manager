@@ -39,9 +39,9 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "daphne",
     "django.contrib.staticfiles",
     # 3rd party apps
-    "daphne",
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
@@ -77,7 +77,6 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
-
 
 
 # Default Auto Field
@@ -180,4 +179,3 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
-
