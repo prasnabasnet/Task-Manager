@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from apps.users.models.basemodel import BaseModel
+from apps.shared.models.basemodel import BaseModel
 
 
 class Profile(BaseModel):

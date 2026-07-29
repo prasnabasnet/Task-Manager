@@ -1,11 +1,11 @@
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
-from apps.common.services import (
-    BaseService,
-)
 from apps.projects.models import Project, ProjectMember
 from apps.projects.utils import send_project_notification
+from apps.shared.services import (
+    BaseService,
+)
 
 User = get_user_model()
 

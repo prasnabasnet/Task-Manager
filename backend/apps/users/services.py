@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, get_user_model
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 
-from apps.common.services import BaseService
+from apps.shared.services import BaseService
 from apps.users.models import Profile
 from apps.users.serializers import ProfileUpdateSerializer, UserRegisterSerializer
 
