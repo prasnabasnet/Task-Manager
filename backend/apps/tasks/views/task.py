@@ -1,12 +1,18 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, viewsets, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.response import Response
 
 from apps.tasks.filters import TaskFilter
 from apps.tasks.models.task import Task
 from apps.tasks.permissions import CanDeleteTask, CanModifyTask, IsProjectMemberForTask
 from apps.tasks.serializers.task import TaskSerializer
+from apps.tasks.services import(
+    CreateTaskService,
+    DeleteTaskService,
+    UpdateTaskService,
+)
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -34,16 +40,32 @@ class TaskViewSet(viewsets.ModelViewSet):
             | Task.objects.filter(project__members=user)
         ).distinct()
 
-    def perform_create(self, serializer):
-        project = serializer.validated_data.get("project")
-        user = self.request.user
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        is_member = (
-            getattr(user, "is_admin", False)
-            or project.owner == user
-            or project.members.filter(id=user.id).exists()
+        task = CreateTaskService(
+            request=request,
+            validated_data=serializer.validated_data,
+           
+       )
+        return Response(self.get_serializer(task).data,
+                        status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        task = UpdateTaskService.execute(
+            request=request,
+            validated_data=serializer.validated_data,
+            task=instance
         )
-        if not is_member:
-            raise PermissionDenied("You are not a member of this project.")
+        return Response(self.get_serializer(task).data)
 
-        serializer.save(created_by=user)
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        DeleteTaskService.execute(request=request, task=instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
