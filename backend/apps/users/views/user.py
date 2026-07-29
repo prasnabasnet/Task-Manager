@@ -92,7 +92,7 @@ class LogoutView(views.APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        LogoutUserService.execute(user=request.user)
+        LogoutUserService.execute(request=request)
         return Response(
             {"message": "Successfully logged out."}, status=status.HTTP_200_OK
         )

@@ -1,8 +1,8 @@
 from rest_framework.exceptions import NotFound, PermissionDenied
 
-from apps.common.services import BaseService
 from apps.organization.models import Organization
 from apps.projects.serializers import ProjectSerializer
+from apps.shared.services import BaseService
 
 
 class BaseDepartmentService(BaseService):

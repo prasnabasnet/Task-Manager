@@ -1,9 +1,8 @@
 from django.contrib.contenttypes.models import ContentType
-from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.comments.models import Comment
 from apps.comments.permissions import IsProjectMember
-from apps.common.services import BaseService
+from apps.shared.services import BaseService
 
 APP_LABEL_MAP = {
     "organization": "organization",
@@ -30,7 +29,7 @@ class GetCommentsService(BaseService):
             permission = IsProjectMember()
             self.check_permission(
                 permission.has_object_permission(request, view, parent_comment),
-                "Permission denied for parent comment."
+                "Permission denied for parent comment.",
             )
             return queryset.filter(parent_id=parent_id)
 
@@ -39,7 +38,9 @@ class GetCommentsService(BaseService):
             if not app_label:
                 return queryset.none()
 
-            ct = self.get_object_or_none(ContentType, app_label=app_label, model=target_type)
+            ct = self.get_object_or_none(
+                ContentType, app_label=app_label, model=target_type
+            )
             if not ct:
                 return queryset.none()
 
@@ -51,7 +52,7 @@ class GetCommentsService(BaseService):
             permission = IsProjectMember()
             self.check_permission(
                 permission.has_object_permission(request, view, target_obj),
-                "Permission denied for target object."
+                "Permission denied for target object.",
             )
 
             return queryset.filter(
@@ -76,7 +77,7 @@ class CreateCommentService(BaseService):
         permission = IsProjectMember()
         self.check_permission(
             permission.has_object_permission(request, view, target_obj),
-            "Permission denied for target object."
+            "Permission denied for target object.",
         )
 
         return serializer.save(
