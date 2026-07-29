@@ -1,4 +1,7 @@
 from django.contrib import admin
+
+from unfold.admin import ModelAdmin
+from unfold.decorators import display
 from apps.tasks.models import Task  
 
 
@@ -22,3 +25,25 @@ class TaskAdmin(admin.ModelAdmin):
     def display_assignees(self, obj):
         return ", ".join([user.email for user in obj.assignees.all()])
     display_assignees.short_description = 'Assignees'
+    @display(description="Status",
+             ordering="status",
+             label={
+                 Task.Status.TODO: "danger",
+                 Task.Status.IN_PROGRESS: "warning",
+                 Task.Status.DONE: "success",
+             },
+             )
+
+    def display_status(self, obj):
+        return obj.get_status_display()
+
+    @display(description="Priority",
+             ordering="priority",
+             label={
+                 Task.Priority.LOW: "info",
+                 Task.Priority.MEDIUM: "primary",
+                 Task.Priority.HIGH: "danger",
+             },
+                )
+    def display_priority(self, obj):
+        return obj.get_priority_display()
