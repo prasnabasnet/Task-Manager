@@ -38,7 +38,8 @@ class AuthenticateUserService(BaseService):
 
 class LogoutUserService(BaseService):
     def process(self):
-        Token.objects.filter(user=self.user).delete()
+        if self.request and self.request.auth:
+            self.request.auth.delete()
 
 
 class UpdateProfileService(BaseService):
