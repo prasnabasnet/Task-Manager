@@ -78,6 +78,8 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
+# Spectacular docs: https://drf-spectacular.readthedocs.io/en/latest/readme.html#installation
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "Task Manager API",
     "DESCRIPTION": "API for managing organizations, departments, projects, tasks, and comments.",
@@ -172,6 +174,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+# 
 MIGRATION_MODULES = {
     "organization": "apps.organization.migrations",
     "department": "apps.department.migrations",

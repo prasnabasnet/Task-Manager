@@ -1,8 +1,9 @@
-from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
-from apps.users.serializers import UserDetailSerializer
+from rest_framework import serializers
+
 from apps.comments.mention_parser import parse_mentions
 from apps.comments.models import Comment
+from apps.users.serializers import UserDetailSerializer
 
 
 class ReplySerializer(serializers.ModelSerializer):
