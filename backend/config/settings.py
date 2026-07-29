@@ -34,7 +34,6 @@ ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 
 INSTALLED_APPS = [
     # django internals
-    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -42,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # 3rd party apps
+    "daphne",
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
@@ -78,12 +78,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-SPECTACULAR_SETTINGS = {
-    "TITLE": "Task Manager API",
-    "DESCRIPTION": "API for managing organizations, departments, projects, tasks, and comments.",
-    "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": False,
-}
+
 
 # Default Auto Field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -130,7 +125,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("127.0.0.1", 6379)],  # Fix this, put it in the env dont hardcode
         },
     }
 }
@@ -172,16 +167,17 @@ USE_I18N = True
 
 USE_TZ = True
 
-MIGRATION_MODULES = {
-    "organization": "apps.organization.migrations",
-    "department": "apps.department.migrations",
-    "projects": "apps.projects.migrations",
-    "tasks": "apps.tasks.migrations",
-    "comments": "apps.comments.migrations",
-    "users": "apps.users.migrations",
-}
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+
+# Spectacular docs: https://drf-spectacular.readthedocs.io/en/latest/readme.html#installation
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Task Manager API",
+    "DESCRIPTION": "API for managing organizations, departments, projects, tasks, and comments.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
