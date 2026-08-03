@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { projectsApi, tasksApi } from '../api'
 import ApiHint from '../components/ApiHint'
 import { EmptyState, ErrorBanner, PriorityBadge, StatusBadge } from '../components/ui'
+import { useTaskSocket } from '../hooks/useProjectSocket'
 import TaskDetail from './TaskDetail'
 
 export default function Backlog() {
@@ -13,6 +14,25 @@ export default function Backlog() {
   const [error, setError] = useState('')
   const [filter, setFilter] = useState({ status: '', priority: '', title: '' })
   const [selectedTaskId, setSelectedTaskId] = useState(null)
+
+  const handleTaskEvent = useCallback((event) => {
+    if (!event) return
+    const { action, task, task_id } = event
+
+    if (action === 'created' && task) {
+      setTasks((prev) => {
+        if (prev.some((t) => t.id === task.id)) return prev
+        return [...prev, task]
+      })
+    } else if (action === 'updated' && task) {
+      setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, ...task } : t)))
+    } else if (action === 'deleted' && (task_id || task?.id)) {
+      const idToDelete = task_id || task?.id
+      setTasks((prev) => prev.filter((t) => t.id !== idToDelete))
+    }
+  }, [])
+
+  useTaskSocket(projectId, handleTaskEvent)
 
   const load = useCallback(async () => {
     setError('')
