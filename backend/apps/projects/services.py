@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
+from rest_framework import status
+from rest_framework.exceptions import APIException, NotFound, PermissionDenied, ValidationError
 
 from apps.projects.models import Project, ProjectMember
 from apps.projects.utils import send_project_notification
@@ -8,6 +9,12 @@ from apps.shared.services import (
 )
 
 User = get_user_model()
+
+
+class Conflict(ValidationError):
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "Conflict"
+    default_code = "conflict"
 
 
 class CreateProjectService(BaseService):
@@ -96,10 +103,10 @@ class AddProjectMemberService(BaseService):
         try:
             user_to_add = User.objects.get(id=self.user_id)
         except User.DoesNotExist:
-            raise NotFound("User not found.")
+            raise ValidationError("User not found.")
 
         if ProjectMember.objects.filter(project=project, user=user_to_add).exists():
-            raise ValidationError("User is already a member of this project.")
+            raise Conflict("User is already a member of this project.")
 
         membership = ProjectMember.objects.create(project=project, user=user_to_add)
 

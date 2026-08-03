@@ -4,6 +4,10 @@ from django.db import transaction
 from apps.tasks.models import Task
 from apps.tasks.serializers import TaskSerializer
 from apps.shared.services import BaseService
+from apps.shared.tasks import (
+    send_task_completion_email_task,
+    send_task_update_email_task,
+)
 
 class CreateTaskService(BaseService):
 
@@ -71,9 +75,25 @@ class UpdateTaskService(BaseService):
             f"Status changed: {status_changed}, Priority changed: {priority_changed}."
         )
 
+        if status_changed and self.task.status == Task.Status.DONE:
+            task_id = self.task.id
+            transaction.on_commit(
+                lambda: send_task_completion_email_task.delay(task_id)
+            )
+
+        if status_changed or priority_changed:
+            task_id = self.task.id
+            sc = status_changed
+            pc = priority_changed
+            transaction.on_commit(
+                lambda: send_task_update_email_task.delay(
+                    task_id, status_changed=sc, priority_changed=pc
+                )
+            )
+
         self._broadcast_websocket_event(
             task=self.task, action="updated", status_changed=status_changed, priority_changed=priority_changed
-            )
+        )
 
         return self.task
 

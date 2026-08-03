@@ -10,7 +10,7 @@ User = get_user_model()
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ["avatar_url", "bio", "display_name", "timezone"]
+        fields = ["avatar_url", "bio", "display_name"]
 
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
@@ -18,7 +18,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["avatar_url", "bio", "display_name", "timezone"]
+        fields = ["avatar_url", "bio", "display_name"]
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
