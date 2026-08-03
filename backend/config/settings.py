@@ -197,25 +197,129 @@ SILKY_MAX_QUERY_SIZE = 0  # Maximum SQL query length (0 = unlimited)
 SILKY_PYTHON_SQL_EXPLAIN = False  # Whether to run EXPLAIN on SQL queries
 SILKY_JS_FETCH_DEPS = True  # Fetch JS dependencies for charts
 
-# Unfold Theme Settings 
+from django.urls import reverse_lazy
+
+# Unfold Theme & Administration Settings 
 UNFOLD = {
     "SITE_TITLE": "Task Manager Admin",
-    "SITE_HEADER": "Task Manager Administration",
+    "SITE_HEADER": "Task Manager Workspace",
     "SITE_URL": "/",
+    "SITE_SYMBOL": "task_alt",
     "SHOW_HISTORY": True,
+    "SHOW_LANGUAGES": False,
+    "ENVIRONMENT": "Task Manager Dev Environment",
+    "DASHBOARD_CALLBACK": "config.admin_dashboard.dashboard_callback",
     "COLORS": {
         "primary": {
-            "50": "250 245 255",
-            "100": "243 232 255",
-            "200": "233 213 255",
-            "300": "216 180 254",
-            "400": "192 132 252",
-            "500": "168 85 247",
-            "600": "147 51 234",
-            "700": "126 34 206",
-            "800": "107 33 168",
-            "900": "88 28 135",
-            "950": "59 7 100",
+            "50": "238 242 255",
+            "100": "224 231 255",
+            "200": "199 210 254",
+            "300": "165 180 252",
+            "400": "129 140 248",
+            "500": "99 102 241",
+            "600": "79 70 229",
+            "700": "67 56 202",
+            "800": "55 48 163",
+            "900": "49 46 129",
+            "950": "30 27 75",
         },
     },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "title": "Main Workspace",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Dashboard",
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                    {
+                        "title": "Tasks",
+                        "icon": "task",
+                        "link": reverse_lazy("admin:tasks_task_changelist"),
+                        "badge": "config.admin_dashboard.badge_tasks_count",
+                    },
+                    {
+                        "title": "Projects",
+                        "icon": "folder",
+                        "link": reverse_lazy("admin:projects_project_changelist"),
+                        "badge": "config.admin_dashboard.badge_projects_count",
+                    },
+                ],
+            },
+            {
+                "title": "Organization & Departments",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Organizations",
+                        "icon": "corporate_fare",
+                        "link": reverse_lazy("admin:organization_organization_changelist"),
+                    },
+                    {
+                        "title": "Departments",
+                        "icon": "domain",
+                        "link": reverse_lazy("admin:department_department_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Users & Access Control",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Users",
+                        "icon": "person",
+                        "link": reverse_lazy("admin:users_user_changelist"),
+                        "badge": "config.admin_dashboard.badge_users_count",
+                    },
+                    {
+                        "title": "Groups & Permissions",
+                        "icon": "group",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Discussions & Audits",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Comments",
+                        "icon": "chat",
+                        "link": reverse_lazy("admin:comments_comment_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+    "HEADER_LINKS": [
+        {
+            "title": "Swagger Docs",
+            "icon": "api",
+            "link": reverse_lazy("swagger-ui"),
+            "attrs": {"target": "_blank"},
+        },
+        {
+            "title": "ReDoc",
+            "icon": "description",
+            "link": reverse_lazy("redoc"),
+            "attrs": {"target": "_blank"},
+        },
+        {
+            "title": "Silk Profiler",
+            "icon": "monitoring",
+            "link": "/silk/",
+            "attrs": {"target": "_blank"},
+        },
+    ],
 }
+
