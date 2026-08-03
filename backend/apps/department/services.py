@@ -1,5 +1,8 @@
+from django.contrib.auth import get_user_model
 from rest_framework.exceptions import NotFound, PermissionDenied
 
+from apps.department.models import Department
+from apps.department.serializers import DepartmentSerializer
 from apps.organization.models import Organization
 from apps.projects.serializers import ProjectSerializer
 from apps.shared.services import BaseService
@@ -12,9 +15,13 @@ class BaseDepartmentService(BaseService):
         except Organization.DoesNotExist:
             raise NotFound("Organization not found")
 
-        if not getattr(user, "is_admin", False):
+        if not (getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN"):
             is_owner = org.owner == user
-            is_member = org.memberships.filter(user=user).exists()
+            is_member = (
+                org.memberships.filter(user=user).exists()
+                or org.departments.filter(projects__members=user).exists()
+                or org.departments.filter(projects__tasks__assignees=user).exists()
+            )
             if not (is_owner or is_member):
                 raise PermissionDenied("You are not a member of this organization")
 
@@ -27,15 +34,31 @@ class GetDepartmentService(BaseDepartmentService):
         return org.departments.all()
 
 
+User = get_user_model()
+
+
 class CreateDepartmentService(BaseDepartmentService):
     def process(self):
         org = self.get_organization(self.organization_id, self.user)
-        return self.serializer.save(organizatoin=org)
+        if isinstance(self.data, dict) and any(
+            isinstance(v, User) for v in self.data.values()
+        ):
+            return Department.objects.create(organization=org, **self.data)
+        serializer = DepartmentSerializer(data=self.data)
+        serializer.is_valid(raise_exception=True)
+        return serializer.save(organization=org)
 
 
 class GetDepartmentProjectService(BaseService):
     def process(self):
-        return self.departments.projects.all()
+        user = self.user
+        if getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN":
+            return self.department.projects.all()
+        return (
+            self.department.projects.filter(owner=user)
+            | self.department.projects.filter(members=user)
+            | self.department.projects.filter(tasks__assignees=user)
+        ).distinct()
 
 
 class CreateProjectService(BaseService):

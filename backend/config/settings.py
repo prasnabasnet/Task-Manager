@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # 3rd party apps
     "corsheaders",
+    "silk",
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
@@ -93,6 +94,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "silk.middleware.SilkyMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -108,7 +110,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -122,7 +124,7 @@ TEMPLATES = [
 
 ASGI_APPLICATION = "config.asgi.application"
 
-# Redis
+# Channel Layers
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -178,6 +180,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+LOGIN_URL = "/djadmin/login/"
 
 
 # Spectacular docs: https://drf-spectacular.readthedocs.io/en/latest/readme.html#installation
@@ -187,7 +191,18 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
-# Unfold Theme Settings 
+# Django Silk Configuration
+# Profiling and introspection tool for Django
+SILKY_AUTHENTICATION = True  # Require authentication to access Silk
+SILKY_AUTHORIZATION = True  # Require staff/superuser to access Silk profiling
+SILKY_INTERCEPT = True  # Profile requests
+SILKY_MAX_RECORDS = 10000  # Maximum number of recorded requests to keep
+SILKY_MAX_REQUEST_VARS = 1000  # Maximum number of request variables to store
+SILKY_MAX_QUERY_SIZE = 0  # Maximum SQL query length (0 = unlimited)
+SILKY_PYTHON_SQL_EXPLAIN = False  # Whether to run EXPLAIN on SQL queries
+SILKY_JS_FETCH_DEPS = True  # Fetch JS dependencies for charts
+
+# Unfold Theme Settings
 UNFOLD = {
     "SITE_TITLE": "Task Manager Admin",
     "SITE_HEADER": "Task Manager Administration",

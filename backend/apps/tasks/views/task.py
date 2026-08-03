@@ -33,11 +33,12 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if getattr(user, "is_admin", False):
+        if getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN":
             return Task.objects.all()
         return (
             Task.objects.filter(project__owner=user)
             | Task.objects.filter(project__members=user)
+            | Task.objects.filter(assignees=user)
         ).distinct()
 
     def create(self, request, *args, **kwargs):

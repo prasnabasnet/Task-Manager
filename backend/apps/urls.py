@@ -6,5 +6,5 @@ urlpatterns = [
     path("projects/", include("apps.projects.urls")),
     path("tasks/", include("apps.tasks.urls")),
     path("comments/", include("apps.comments.urls")),
-    path("departments/", include("apps.department.urls")),
+    path("organizations/<int:oid>/departments/", include("apps.department.urls")),
 ]
