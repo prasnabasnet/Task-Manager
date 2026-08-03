@@ -33,6 +33,7 @@ ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "unfold",
     "unfold.contrib.filters",
     "unfold.contrib.forms",
@@ -42,7 +43,6 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "daphne",
     "django.contrib.staticfiles",
     # 3rd party apps
     "corsheaders",
