@@ -3,12 +3,13 @@ from rest_framework.permissions import BasePermission
 
 class IsProjectMemberForTask(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if getattr(request.user, "is_admin", False):
+        if getattr(request.user, "is_admin", False) or getattr(request.user, "role", "") == "ADMIN":
             return True
         project = obj.project
         return (
             project.owner == request.user
             or project.members.filter(id=request.user.id).exists()
+            or obj.assignees.filter(id=request.user.id).exists()
         )
 
 

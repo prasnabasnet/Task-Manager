@@ -19,9 +19,11 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if getattr(user, "is_admin", False):
+        if getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN":
             return Organization.objects.all()
         return (
             Organization.objects.filter(memberships__user=user)
             | Organization.objects.filter(owner=user)
+            | Organization.objects.filter(departments__projects__members=user)
+            | Organization.objects.filter(departments__projects__tasks__assignees=user)
         ).distinct()

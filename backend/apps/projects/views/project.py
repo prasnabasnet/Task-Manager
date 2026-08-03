@@ -31,9 +31,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
             member_count=Count("members", distinct=True),
             task_count=Count("tasks", distinct=True),
         )
-        if user.role == "ADMIN":
+        if getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN":
             return base_queryset
-        return base_queryset.filter(owner=user) | base_queryset.filter(members=user)
+        return (
+            base_queryset.filter(owner=user)
+            | base_queryset.filter(members=user)
+            | base_queryset.filter(tasks__assignees=user)
+        ).distinct()
 
     def get_permissions(self):
         if self.action == "create":
