@@ -54,8 +54,8 @@ export function useWebSocket(path, options = {}) {
         setIsConnected(false)
         callbacksRef.current.onClose?.(event)
 
-        // Attempt reconnection if not closed cleanly or intentionally
-        if (enabled && !event.wasClean) {
+        // Attempt reconnection only if not closed cleanly (e.g. 1000) and within max retries limit
+        if (enabled && !event.wasClean && event.code !== 1000 && reconnectCountRef.current < 5) {
           const timeout = Math.min(1000 * Math.pow(2, reconnectCountRef.current), 10000)
           reconnectCountRef.current += 1
           reconnectTimeoutRef.current = setTimeout(() => {

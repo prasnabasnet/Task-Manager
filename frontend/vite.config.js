@@ -13,6 +13,12 @@ export default defineConfig({
       '/ws': {
         target: 'ws://127.0.0.1:8000',
         ws: true,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            if (err.code === 'ECONNRESET' || err.code === 'EPIPE') return
+            console.warn('[vite-ws-proxy] WebSocket proxy error:', err.message)
+          })
+        },
       },
     },
   },
