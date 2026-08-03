@@ -1,15 +1,29 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
+import { useProjectSocket } from '../hooks/useProjectSocket'
+import ToastContainer from './ToastContainer'
 import ApiHint from './ApiHint'
 import CommentsSection from './CommentsSection'
 import './Layout.css'
 
 export default function Layout() {
   const { user, logout } = useAuth()
+  const { addToast } = useToast()
   const navigate = useNavigate()
   const { projectId } = useParams()
   const [showProjectComments, setShowProjectComments] = useState(false)
+
+  const { isConnected } = useProjectSocket(projectId, (data) => {
+    if (data && data.message && data.type !== 'connection_established') {
+      addToast({
+        title: 'Real-time Update',
+        message: data.message,
+        type: 'info',
+      })
+    }
+  })
 
   const handleLogout = async () => {
     await logout()
@@ -22,6 +36,7 @@ export default function Layout() {
 
   return (
     <div className="app-shell">
+      <ToastContainer />
       <aside className="sidebar">
         <div className="sidebar-brand">
           <span className="brand-mark">TM</span>
@@ -119,7 +134,32 @@ export default function Layout() {
       <div className="main-area">
         <header className="topbar">
           <div className="topbar-title">Task Manager</div>
-          <div className="topbar-right">
+          <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {projectId && (
+              <span
+                style={{
+                  fontSize: '0.78rem',
+                  padding: '3px 8px',
+                  borderRadius: '12px',
+                  background: isConnected ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  color: isConnected ? '#10b981' : '#ef4444',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontWeight: 500,
+                }}
+              >
+                <span
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: isConnected ? '#10b981' : '#ef4444',
+                  }}
+                />
+                {isConnected ? 'Live Sync' : 'Offline'}
+              </span>
+            )}
             <span className="muted">{user?.email}</span>
           </div>
         </header>
