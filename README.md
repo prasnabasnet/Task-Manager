@@ -19,7 +19,7 @@ cd backend
 uv sync
 # ensure backend/.env exists (SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASE_URL)
 uv run python manage.py migrate
-uv run python manage.py loaddata fixtures/test_data.json   # optional
+uv run python manage.py loaddata users organization department projects tasks comments   # optional
 uv run python manage.py runserver
 ```
 
