@@ -15,9 +15,13 @@ class BaseDepartmentService(BaseService):
         except Organization.DoesNotExist:
             raise NotFound("Organization not found")
 
-        if not getattr(user, "is_admin", False):
+        if not (getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN"):
             is_owner = org.owner == user
-            is_member = org.memberships.filter(user=user).exists()
+            is_member = (
+                org.memberships.filter(user=user).exists()
+                or org.departments.filter(projects__members=user).exists()
+                or org.departments.filter(projects__tasks__assignees=user).exists()
+            )
             if not (is_owner or is_member):
                 raise PermissionDenied("You are not a member of this organization")
 
@@ -47,7 +51,14 @@ class CreateDepartmentService(BaseDepartmentService):
 
 class GetDepartmentProjectService(BaseService):
     def process(self):
-        return self.department.projects.all()
+        user = self.user
+        if getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN":
+            return self.department.projects.all()
+        return (
+            self.department.projects.filter(owner=user)
+            | self.department.projects.filter(members=user)
+            | self.department.projects.filter(tasks__assignees=user)
+        ).distinct()
 
 
 class CreateProjectService(BaseService):
