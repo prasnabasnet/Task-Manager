@@ -45,11 +45,10 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        task = CreateTaskService(
+        task = CreateTaskService.execute(
             request=request,
             validated_data=serializer.validated_data,
-           
-       )
+        )
         return Response(self.get_serializer(task).data,
                         status=status.HTTP_201_CREATED)
 

@@ -10,7 +10,6 @@ export default function Profile() {
     display_name: '',
     bio: '',
     avatar_url: '',
-    timezone: 'UTC',
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -22,7 +21,6 @@ export default function Profile() {
         display_name: user.profile.display_name || '',
         bio: user.profile.bio || '',
         avatar_url: user.profile.avatar_url || '',
-        timezone: user.profile.timezone || 'UTC',
       })
     }
   }, [user])
@@ -102,26 +100,6 @@ export default function Profile() {
           />
         </label>
 
-        <label className="field">
-          <span>Timezone</span>
-          <select
-            value={formData.timezone}
-            onChange={(e) => setFormData((f) => ({ ...f, timezone: e.target.value }))}
-            className="select"
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }}
-          >
-            <option value="UTC">UTC (GMT+0)</option>
-            <option value="America/New_York">Eastern Time (US & Canada)</option>
-            <option value="America/Chicago">Central Time (US & Canada)</option>
-            <option value="America/Denver">Mountain Time (US & Canada)</option>
-            <option value="America/Los_Angeles">Pacific Time (US & Canada)</option>
-            <option value="Europe/London">London (GMT+1)</option>
-            <option value="Europe/Paris">Paris (GMT+2)</option>
-            <option value="Asia/Kolkata">India (GMT+5:30)</option>
-            <option value="Asia/Kathmandu">Nepal (GMT+5:45)</option>
-            <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
-          </select>
-        </label>
 
         <label className="field">
           <span>Bio</span>

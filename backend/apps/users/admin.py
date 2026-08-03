@@ -1,12 +1,12 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin as BaseGroupAdmin
+from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
 from unfold.admin import ModelAdmin, StackedInline
-from unfold.decorators import display, action
-from unfold.contrib.filters.admin import ChoicesDropdownFilter, BooleanRadioFilter
+from unfold.contrib.filters.admin import BooleanRadioFilter, ChoicesDropdownFilter
+from unfold.decorators import action, display
 
-from apps.users.models import Profile, User, RoleChoices
-
+from apps.users.models import Profile, RoleChoices, User
 
 # Unregister default Group and register with Unfold ModelAdmin + BaseGroupAdmin
 admin.site.unregister(Group)
@@ -22,7 +22,7 @@ class ProfileInline(StackedInline):
     can_delete = False
     verbose_name_plural = "User Profile"
     fk_name = "user"
-    fields = ("display_name", "avatar_url", "bio", "timezone")
+    fields = ("display_name", "avatar_url", "bio")
     tab = True
 
 

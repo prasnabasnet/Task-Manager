@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "service_objects",
+    "anymail",
+    "django_celery_beat",
     # my apps
     "channels",
     "apps.shared",
@@ -124,13 +126,13 @@ TEMPLATES = [
 
 ASGI_APPLICATION = "config.asgi.application"
 
-# Channel Layers
+# Redis & Channel Layers
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": env(
-            "CHANNEL_LAYER_BACKEND",
-            default="channels.layers.InMemoryChannelLayer",
-        ),
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [env("REDIS_URL", default="redis://127.0.0.1:6379/0")],
+        },
     }
 }
 
@@ -199,7 +201,7 @@ SILKY_JS_FETCH_DEPS = True  # Fetch JS dependencies for charts
 
 from django.urls import reverse_lazy
 
-# Unfold Theme & Administration Settings 
+# Unfold Theme & Administration Settings
 UNFOLD = {
     "SITE_TITLE": "Task Manager Admin",
     "SITE_HEADER": "Task Manager Workspace",
@@ -260,7 +262,9 @@ UNFOLD = {
                     {
                         "title": "Organizations",
                         "icon": "corporate_fare",
-                        "link": reverse_lazy("admin:organization_organization_changelist"),
+                        "link": reverse_lazy(
+                            "admin:organization_organization_changelist"
+                        ),
                     },
                     {
                         "title": "Departments",
@@ -323,3 +327,42 @@ UNFOLD = {
     ],
 }
 
+# -----------------------------------------------------------------------------
+# Celery Configuration
+# -----------------------------------------------------------------------------
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://127.0.0.1:6379/0")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://127.0.0.1:6379/0")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+
+# -----------------------------------------------------------------------------
+# Celery Beat Schedule Configuration
+# -----------------------------------------------------------------------------
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "daily-productivity-summary": {
+        "task": "apps.shared.tasks.send_daily_productivity_summary_task",
+        # "schedule": crontab(hour=0, minute=0),
+        "schedule": crontab(minute="*"),
+    },
+}
+
+# -----------------------------------------------------------------------------
+# Flower Configuration
+# -----------------------------------------------------------------------------
+CELERY_FLOWER_HOST = env("CELERY_FLOWER_HOST", default="127.0.0.1")
+CELERY_FLOWER_PORT = env.int("CELERY_FLOWER_PORT", default=5555)
+
+# -----------------------------------------------------------------------------
+# Anymail & Resend Email Configuration
+# -----------------------------------------------------------------------------
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+RESEND_API_KEY = env("RESEND_API_KEY", default="")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="onboarding@resend.dev")
+
+ANYMAIL = {
+    "RESEND_API_KEY": RESEND_API_KEY,
+}
