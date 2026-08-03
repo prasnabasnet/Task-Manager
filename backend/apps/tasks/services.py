@@ -3,7 +3,7 @@ from channels.layers import get_channel_layer
 from django.db import transaction
 from apps.tasks.models import Task
 from apps.tasks.serializers import TaskSerializer
-from apps.common.services import BaseService
+from apps.shared.services import BaseService
 
 class CreateTaskService(BaseService):
 
