@@ -18,6 +18,11 @@ export default defineConfig({
             if (err.code === 'ECONNRESET' || err.code === 'EPIPE') return
             console.warn('[vite-ws-proxy] WebSocket proxy error:', err.message)
           })
+          proxy.on('proxyReqWs', (_proxyReq, _req, socket) => {
+            socket.on('error', (err) => {
+              if (err.code === 'ECONNRESET' || err.code === 'EPIPE') return
+            })
+          })
         },
       },
     },
