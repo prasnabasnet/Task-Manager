@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { projectsApi } from '../api'
 import ApiHint from '../components/ApiHint'
 import { ErrorBanner, Modal } from '../components/ui'
+import { useProjectSocket } from '../hooks/useProjectSocket'
 
 export default function ProjectSettings() {
   const { projectId } = useParams()
@@ -15,7 +16,7 @@ export default function ProjectSettings() {
   const [busy, setBusy] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setError('')
     try {
       const [proj, memberList] = await Promise.all([
@@ -28,11 +29,17 @@ export default function ProjectSettings() {
     } catch (err) {
       setError(err.message)
     }
-  }
+  }, [projectId])
+
+  useProjectSocket(projectId, useCallback((data) => {
+    if (data && ['member_added', 'member_removed', 'project_updated'].includes(data.type)) {
+      load()
+    }
+  }, [load]))
 
   useEffect(() => {
     load()
-  }, [projectId])
+  }, [load])
 
   const save = async (e) => {
     e.preventDefault()
