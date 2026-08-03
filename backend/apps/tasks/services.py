@@ -11,8 +11,10 @@ class CreateTaskService(BaseService):
         project = self.validated_data.get('project')
         is_member = (
             getattr(self.user, 'is_admin', False) 
-            or project.owwner == self.user
+            or getattr(self.user, 'role', '') == 'ADMIN'
+            or project.owner == self.user
             or project.members.filter(id=self.user.id).exists()
+            or project.tasks.filter(assignees=self.user).exists()
         )
         self.check_permission(is_member, "You do not have permission to create a task in this project.")
 
@@ -22,6 +24,8 @@ class CreateTaskService(BaseService):
 
         if assignees:
             task.assignees.set(assignees)
+            for u in assignees:
+                task.project.members.add(u)
 
         self.log_info(f"Task '{task.title}' created by user '{self.user.username}' in project '{task.project.name}'.")
 
@@ -56,6 +60,8 @@ class UpdateTaskService(BaseService):
 
         if assignees is not None:
             self.task.assignees.set(assignees)
+            for u in assignees:
+                self.task.project.members.add(u)
 
         status_changed = old_status != self.task.status
         priority_changed = old_priority != self.task.priority

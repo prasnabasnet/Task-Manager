@@ -38,10 +38,12 @@ class ProjectConsumer(AsyncWebsocketConsumer):
             project = Project.objects.get(pk=project_id)
         except Project.DoesNotExist:
             return False
-        if user.role == "ADMIN":
+        if getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN":
             return True
         return (
-            project.owner_id == user.id or project.members.filter(id=user.id).exists()
+            project.owner_id == user.id
+            or project.members.filter(id=user.id).exists()
+            or project.tasks.filter(assignees=user).exists()
         )
 
     async def disconnect(self, close_code):

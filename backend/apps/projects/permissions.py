@@ -25,8 +25,10 @@ class IsProjectMemberOrAdmin(BasePermission):
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        if request.user.role == "ADMIN":
+        if getattr(request.user, "is_admin", False) or getattr(request.user, "role", "") == "ADMIN":
             return True
         return (
-            obj.members.filter(id=request.user.id).exists() or obj.owner == request.user
+            obj.owner == request.user
+            or obj.members.filter(id=request.user.id).exists()
+            or obj.tasks.filter(assignees=request.user).exists()
         )
