@@ -124,13 +124,13 @@ TEMPLATES = [
 
 ASGI_APPLICATION = "config.asgi.application"
 
-# Redis
+# Channel Layers
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],  # Fix this, put it in the env dont hardcode
-        },
+        "BACKEND": env(
+            "CHANNEL_LAYER_BACKEND",
+            default="channels.layers.InMemoryChannelLayer",
+        ),
     }
 }
 
