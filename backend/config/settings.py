@@ -127,7 +127,12 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],  # Fix this, put it in the env dont hardcode
+            "hosts": [
+                (
+                    env("REDIS_HOST", default="127.0.0.1"),
+                    env.int("REDIS_PORT", default=6379),
+                )
+            ],
         },
     }
 }
