@@ -5,7 +5,7 @@ from apps.department.views import DepartmentViewSet
 
 router = DefaultRouter()
 
-router.register(r"", DepartmentViewSet, basename="department")
+router.register(r"", DepartmentViewSet, basename="dept")
 
 urlpatterns = [
     path("", include(router.urls)),

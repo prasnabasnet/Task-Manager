@@ -1,5 +1,8 @@
+from django.contrib.auth import get_user_model
 from rest_framework.exceptions import NotFound, PermissionDenied
 
+from apps.department.models import Department
+from apps.department.serializers import DepartmentSerializer
 from apps.organization.models import Organization
 from apps.projects.serializers import ProjectSerializer
 from apps.shared.services import BaseService
@@ -27,15 +30,24 @@ class GetDepartmentService(BaseDepartmentService):
         return org.departments.all()
 
 
+User = get_user_model()
+
+
 class CreateDepartmentService(BaseDepartmentService):
     def process(self):
         org = self.get_organization(self.organization_id, self.user)
-        return self.serializer.save(organizatoin=org)
+        if isinstance(self.data, dict) and any(
+            isinstance(v, User) for v in self.data.values()
+        ):
+            return Department.objects.create(organization=org, **self.data)
+        serializer = DepartmentSerializer(data=self.data)
+        serializer.is_valid(raise_exception=True)
+        return serializer.save(organization=org)
 
 
 class GetDepartmentProjectService(BaseService):
     def process(self):
-        return self.departments.projects.all()
+        return self.department.projects.all()
 
 
 class CreateProjectService(BaseService):
