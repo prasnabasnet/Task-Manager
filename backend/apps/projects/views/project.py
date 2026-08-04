@@ -6,7 +6,7 @@ from rest_framework import viewsets
 from apps.projects.filters import ProjectFilter
 from apps.projects.models import Project
 from apps.projects.permissions import (
-    IsAdminOrPM,
+    IsAdminPMOrTM,
     IsProjectMemberOrAdmin,
     IsProjectOwnerOrAdmin,
 )
@@ -25,6 +25,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProjectFilter
 
+    # controls which porjects can this specific user even see
     def get_queryset(self):
         user = self.request.user
         base_queryset = Project.objects.select_related("owner").annotate(
@@ -41,7 +42,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == "create":
-            return [IsAdminOrPM()]
+            return [IsAdminPMOrTM()]
         if self.action in ("update", "partial_update", "destroy"):
             return [IsProjectOwnerOrAdmin()]
         return [IsProjectMemberOrAdmin()]
