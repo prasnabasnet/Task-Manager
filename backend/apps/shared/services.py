@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional, Type
+from typing import Any
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
@@ -70,22 +70,20 @@ class BaseService:
 
     @classmethod
     def log_error(cls, service_name: str, exception: Exception) -> None:
-        logger.error(
-            f"Service Error in {service_name}: {str(exception)}", exc_info=True
-        )
+        logger.error(f"Service Error in {service_name}: {exception!s}", exc_info=True)
 
     def log_info(self, message: str) -> None:
         logger.info(f"[{self.__class__.__name__}] {message}")
 
-    def get_object(self, model_cls: Type[models.Model], **filters: Any) -> Any:
+    def get_object(self, model_cls: type[models.Model], **filters: Any) -> Any:
         try:
             return model_cls.objects.get(**filters)
         except model_cls.DoesNotExist:
             raise NotFound(f"{model_cls.__name__} not found.")
 
     def get_object_or_none(
-        self, model_cls: Type[models.Model], **filters: Any
-    ) -> Optional[Any]:
+        self, model_cls: type[models.Model], **filters: Any
+    ) -> Any | None:
         try:
             return model_cls.objects.get(**filters)
         except model_cls.DoesNotExist:
@@ -98,7 +96,7 @@ class BaseService:
             raise DRFPermissionDenied(message)
 
     def validate_serializer(
-        self, serializer_class: Any, data: Dict[str, Any], **kwargs: Any
+        self, serializer_class: Any, data: dict[str, Any], **kwargs: Any
     ) -> Any:
         serializer = serializer_class(data=data, **kwargs)
         serializer.is_valid(raise_exception=True)
@@ -106,4 +104,3 @@ class BaseService:
 
     def log_warning(self, message: str) -> None:
         logger.warning(f"[{self.__class__.__name__}] {message}")
-
