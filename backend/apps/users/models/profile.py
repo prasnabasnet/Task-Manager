@@ -13,7 +13,6 @@ class Profile(BaseModel):
     avatar_url = models.URLField(max_length=500, blank=True, null=True)
     bio = models.TextField(max_length=500, blank=True)
     display_name = models.CharField(max_length=100, blank=True)
-    timezone = models.CharField(max_length=50, default="UTC")
 
     class Meta:
         db_table = "users_profile"

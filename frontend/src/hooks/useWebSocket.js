@@ -17,6 +17,9 @@ export function useWebSocket(path, options = {}) {
 
   const connect = useCallback(() => {
     if (!path || !enabled) return
+    if (socketRef.current && (socketRef.current.readyState === WebSocket.OPEN || socketRef.current.readyState === WebSocket.CONNECTING)) {
+      return
+    }
 
     const token = localStorage.getItem('token')
     if (!token) return

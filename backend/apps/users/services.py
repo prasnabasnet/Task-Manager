@@ -1,10 +1,12 @@
 import logging
 
 from django.contrib.auth import authenticate, get_user_model
+from django.db import transaction
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 
 from apps.shared.services import BaseService
+from apps.shared.tasks import send_welcome_email_task
 from apps.users.models import Profile
 from apps.users.serializers import ProfileUpdateSerializer, UserRegisterSerializer
 
@@ -17,6 +19,7 @@ class RegisterUserService(BaseService):
         serializer = self.validate_serializer(UserRegisterSerializer, self.data)
         user = serializer.save()
         token, _ = Token.objects.get_or_create(user=user)
+        transaction.on_commit(lambda: send_welcome_email_task.delay(user.id))
         return user, token
 
 

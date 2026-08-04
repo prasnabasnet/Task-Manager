@@ -208,7 +208,6 @@ class ProfileAPITestCase(TestCase):
         self.assertEqual(profile.bio, "")
         self.assertEqual(profile.display_name, "")
         self.assertIsNone(profile.avatar_url)
-        self.assertEqual(profile.timezone, "UTC")
 
     def test_get_or_create_is_idempotent_for_backfill(self):
         # Simulates re-running the backfill script against a user that
@@ -232,7 +231,6 @@ class ProfileAPITestCase(TestCase):
             "display_name": "Azhar K",
             "bio": "Backend intern",
             "avatar_url": "https://example.com/avatar.jpg",
-            "timezone": "Asia/Kathmandu",
         }
         response = self.client.patch(self.me_url, data, format="json")
         self.assertEqual(response.status_code, 200)
@@ -241,7 +239,6 @@ class ProfileAPITestCase(TestCase):
 
         self.user.profile.refresh_from_db()
         self.assertEqual(self.user.profile.display_name, "Azhar K")
-        self.assertEqual(self.user.profile.timezone, "Asia/Kathmandu")
 
     def test_me_patch_partial_update_only_changes_given_fields(self):
         self._auth()

@@ -40,3 +40,60 @@ class SilkIntegrationTests(TestCase):
         self.client.login(email="admin@example.com", password="password123")
         response = self.client.get("/silk/")
         self.assertEqual(response.status_code, 200)
+
+
+from django.core import mail
+from apps.shared.tasks import (
+    send_welcome_email_task,
+    send_task_completion_email_task,
+    send_task_update_email_task,
+    send_daily_productivity_summary_task,
+)
+from apps.organization.models import Organization
+from apps.department.models import Department
+from apps.projects.models import Project
+from apps.tasks.models import Task
+
+
+class TaskCeleryEmailTests(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="emailtestuser",
+            email="testuser@example.com",
+            password="password123",
+        )
+        self.org = Organization.objects.create(name="Org 1", owner=self.user)
+        self.dept = Department.objects.create(organization=self.org, name="Dept 1")
+        self.project = Project.objects.create(
+            name="Proj 1", owner=self.user, department=self.dept
+        )
+        self.task = Task.objects.create(
+            project=self.project,
+            title="Sample Task",
+            created_by=self.user,
+        )
+
+    def test_send_welcome_email_task(self):
+        send_welcome_email_task(self.user.id)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Welcome to Task Manager!", mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
+
+    def test_send_task_completion_email_task(self):
+        send_task_completion_email_task(self.task.id)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Task Completed: Sample Task", mail.outbox[0].subject)
+
+    def test_send_task_update_email_task(self):
+        send_task_update_email_task(
+            self.task.id, status_changed=True, priority_changed=True
+        )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Task Updated: Sample Task", mail.outbox[0].subject)
+
+    def test_send_daily_productivity_summary_task(self):
+        send_daily_productivity_summary_task()
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Daily Productivity Summary", mail.outbox[0].subject)
+

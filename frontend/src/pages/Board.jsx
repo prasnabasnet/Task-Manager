@@ -35,14 +35,20 @@ export default function Board() {
 
     if (action === 'created' && task) {
       setTasks((prev) => {
-        if (prev.some((t) => t.id === task.id)) return prev
+        if (prev.some((t) => String(t.id) === String(task.id))) return prev
         return [...prev, task]
       })
     } else if (action === 'updated' && task) {
-      setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, ...task } : t)))
-    } else if (action === 'deleted' && (task_id || task?.id)) {
-      const idToDelete = task_id || task?.id
-      setTasks((prev) => prev.filter((t) => t.id !== idToDelete))
+      setTasks((prev) => {
+        const exists = prev.some((t) => String(t.id) === String(task.id))
+        if (exists) {
+          return prev.map((t) => (String(t.id) === String(task.id) ? { ...t, ...task } : t))
+        }
+        return [...prev, task]
+      })
+    } else if (action === 'deleted' && (task_id != null || task?.id != null)) {
+      const idToDelete = task_id != null ? task_id : task?.id
+      setTasks((prev) => prev.filter((t) => String(t.id) !== String(idToDelete)))
     }
   }, [])
 
