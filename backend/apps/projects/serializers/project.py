@@ -45,14 +45,20 @@ class ProjectSerializer(serializers.ModelSerializer):
         user = self.context.get("request") and self.context["request"].user
         if not user:
             return value
-        if getattr(user, "is_admin", False):
+        if getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN":
             return value
 
         org = value.organization
-        is_owner = org.owner == user
-        is_member = org.memberships.filter(user=user).exists()
-        if not (is_owner or is_member):
+        is_owner = org.owner_id == user.id
+        is_org_member = (
+            org.memberships.filter(user=user).exists()
+            or org.departments.filter(head=user).exists()
+            or org.departments.filter(members=user).exists()
+            or org.departments.filter(projects__members=user).exists()
+            or org.departments.filter(projects__tasks__assignees=user).exists()
+        )
+        if not (is_owner or is_org_member):
             raise serializers.ValidationError(
                 "You must belong to the organization of this department to create/assign a project in it."
             )
-            return value
+        return value

@@ -25,9 +25,8 @@ export function useWebSocket(path, options = {}) {
     if (!token) return
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const host = window.location.host || '127.0.0.1:8000'
+    const host = import.meta.env.DEV ? '127.0.0.1:8000' : window.location.host
     const wsUrl = `${protocol}//${host}${path}?token=${encodeURIComponent(token)}`
-
     try {
       const ws = new WebSocket(wsUrl)
       socketRef.current = ws

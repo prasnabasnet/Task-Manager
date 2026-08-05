@@ -1,7 +1,12 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework.exceptions import APIException, NotFound, PermissionDenied, ValidationError
+from rest_framework.exceptions import (
+    NotFound,
+    PermissionDenied,
+    ValidationError,
+)
 
+from apps.department.models import Department
 from apps.projects.models import Project, ProjectMember
 from apps.projects.utils import send_project_notification
 from apps.shared.services import (
@@ -18,21 +23,49 @@ class Conflict(ValidationError):
 
 
 class CreateProjectService(BaseService):
+    def validate(self):
+        department_id = getattr(self, "department", None)
+        if not department_id:
+            raise ValidationError({"department": "This field is required."})
+
+        try:
+            department = Department.objects.get(pk=department_id)
+        except Department.DoesNotExist:
+            raise ValidationError({"department": "Department not found."})
+
+        # Check PM department restriction: PM must be head or member of department
+        if getattr(self.user, "role", "") == "PM" and not getattr(
+            self.user, "is_admin", False
+        ):
+            is_head = department.head_id == self.user.id
+            is_dept_member = department.members.filter(id=self.user.id).exists()
+            if not (is_head or is_dept_member):
+                raise PermissionDenied(
+                    "Project Managers can only create projects within their own department."
+                )
+
     def process(self):
         name = getattr(self, "name", None)
-        department = getattr(self, "department", None)
+        department_id = getattr(self, "department", None)
+        member_ids = getattr(self, "member_ids", None) or []
 
         if not name:
             raise ValidationError({"name": "This field is required."})
-        if not department:
-            raise ValidationError({"department": "This field is required."})
 
         project = Project.objects.create(
             owner=self.user,
             name=name,
             description=getattr(self, "description", "") or "",
-            department_id=department,
+            department_id=department_id,
         )
+
+        if member_ids:
+            for uid in member_ids:
+                try:
+                    u = User.objects.get(pk=uid)
+                    ProjectMember.objects.get_or_create(project=project, user=u)
+                except User.DoesNotExist:
+                    pass
 
         send_project_notification(
             project.id,

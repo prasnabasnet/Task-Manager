@@ -37,18 +37,31 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
     load()
   }, [taskId])
 
+  const isRestrictedTM =
+    user?.role === 'TM' &&
+    task?.created_by?.id !== user?.id
+
   const save = async (e) => {
     e.preventDefault()
     setBusy(true)
     setError('')
     try {
-      const payload = {
-        title: edit.title,
-        description: edit.description,
-        status: edit.status,
-        priority: edit.priority,
-        due_date: edit.due_date || null,
-        assignees: edit.assignee_ids.map(Number),
+      let payload
+      if (isRestrictedTM) {
+        // TMs can only update status and priority
+        payload = {
+          status: edit.status,
+          priority: edit.priority,
+        }
+      } else {
+        payload = {
+          title: edit.title,
+          description: edit.description,
+          status: edit.status,
+          priority: edit.priority,
+          due_date: edit.due_date || null,
+          assignees: edit.assignee_ids.map(Number),
+        }
       }
       await tasksApi.update(taskId, payload)
       await load()
@@ -94,6 +107,7 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
               <input
                 value={edit.title}
                 onChange={(e) => setEdit((f) => ({ ...f, title: e.target.value }))}
+                disabled={isRestrictedTM}
                 required
               />
             </label>
@@ -103,6 +117,7 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
                 rows={5}
                 value={edit.description}
                 onChange={(e) => setEdit((f) => ({ ...f, description: e.target.value }))}
+                disabled={isRestrictedTM}
               />
             </label>
           </form>
@@ -149,10 +164,11 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
                 members.map((m) => {
                   const isChecked = edit.assignee_ids.includes(m.user_id)
                   return (
-                    <label key={m.user_id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', cursor: 'pointer', fontWeight: 'normal' }}>
+                    <label key={m.user_id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', cursor: isRestrictedTM ? 'not-allowed' : 'pointer', fontWeight: 'normal' }}>
                       <input
                         type="checkbox"
                         checked={isChecked}
+                        disabled={isRestrictedTM}
                         onChange={(e) => {
                           const checked = e.target.checked
                           setEdit((f) => {
@@ -178,6 +194,7 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
               form="issue-form"
               type="date"
               value={edit.due_date}
+              disabled={isRestrictedTM}
               onChange={(e) => setEdit((f) => ({ ...f, due_date: e.target.value }))}
             />
           </div>
@@ -193,10 +210,12 @@ export default function TaskDetail({ taskId, onClose, onChanged }) {
               Save changes
               <ApiHint method="PATCH" path={`/api/tasks/${taskId}/`} />
             </button>
-            <button type="button" className="btn btn-danger" disabled={busy} onClick={remove}>
-              Delete issue
-              <ApiHint method="DELETE" path={`/api/tasks/${taskId}/`} />
-            </button>
+            {!isRestrictedTM && (
+              <button type="button" className="btn btn-danger" disabled={busy} onClick={remove}>
+                Delete issue
+                <ApiHint method="DELETE" path={`/api/tasks/${taskId}/`} />
+              </button>
+            )}
           </div>
         </aside>
       </div>

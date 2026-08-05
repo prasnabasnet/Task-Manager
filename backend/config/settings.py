@@ -199,13 +199,9 @@ SILKY_MAX_QUERY_SIZE = 0  # Maximum SQL query length (0 = unlimited)
 SILKY_PYTHON_SQL_EXPLAIN = False  # Whether to run EXPLAIN on SQL queries
 SILKY_JS_FETCH_DEPS = True  # Fetch JS dependencies for charts
 
-<<<<<<< HEAD
-# Unfold Theme Settings
-=======
 from django.urls import reverse_lazy
 
 # Unfold Theme & Administration Settings
->>>>>>> c61a2b68adc6fa826b56d2e0bb52f67a49b65c74
 UNFOLD = {
     "SITE_TITLE": "Task Manager Admin",
     "SITE_HEADER": "Task Manager Workspace",
