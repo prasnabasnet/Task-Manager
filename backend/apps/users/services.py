@@ -1,7 +1,7 @@
 import logging
 
 from django.contrib.auth import authenticate, get_user_model
-from django.db import transaction
+from django.db import models, transaction
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 
@@ -138,4 +138,20 @@ class DeactivateUserService(BaseService):
 
 class GetAllUsersService(BaseService):
     def process(self):
-        return User.objects.select_related("profile").all()
+        user = self.user
+        if getattr(user, "role", "") == "SUPERADMIN" or getattr(user, "is_superuser", False):
+            return User.objects.select_related("profile").all()
+        
+        # Scoped to ORG_ADMIN's organization members
+        org = Organization.objects.filter(owner=user).first()
+        if not org:
+            membership = OrganizationMember.objects.filter(user=user).first()
+            org = membership.organization if membership else None
+
+        if not org:
+            return User.objects.none()
+
+        return User.objects.select_related("profile").filter(
+            models.Q(owned_organization=org) | models.Q(organization_memberships__organization=org)
+        ).distinct()
+

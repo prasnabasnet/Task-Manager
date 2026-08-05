@@ -56,6 +56,16 @@ class UserDetailSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "email", "date_joined"]
 
+    def validate_role(self, value):
+        request = self.context.get("request")
+        req_user = getattr(request, "user", None) if request else None
+
+        if value == "SUPERADMIN":
+            if not req_user or (req_user.role != "SUPERADMIN" and not req_user.is_superuser):
+                raise serializers.ValidationError("Only a Superadmin can assign the SUPERADMIN role.")
+        return value
+
+
 
 class UserListSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(read_only=True)

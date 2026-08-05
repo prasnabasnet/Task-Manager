@@ -121,7 +121,9 @@ export default function Users() {
                     onChange={(e) => changeRole(u.id, e.target.value)}
                     disabled={u.id === user.id}
                   >
-                    <option value="SUPERADMIN">SUPERADMIN</option>
+                    {(user?.role === 'SUPERADMIN' || user?.is_superuser) && (
+                      <option value="SUPERADMIN">SUPERADMIN</option>
+                    )}
                     <option value="ORG_ADMIN">ORG_ADMIN</option>
                     <option value="PM">PM</option>
                     <option value="TM">TM</option>

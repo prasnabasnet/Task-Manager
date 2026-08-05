@@ -8,9 +8,12 @@ from apps.users.services import DeactivateUserService, GetAllUsersService
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = GetAllUsersService.execute()
     permission_classes = [IsAuthenticated, IsAdmin]
     http_method_names = ["get", "patch", "delete", "head", "options"]
+
+    def get_queryset(self):
+        return GetAllUsersService.execute(request=self.request)
+
 
     def get_serializer_class(self):
         if self.action in ("retrieve", "partial_update"):
