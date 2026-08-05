@@ -17,9 +17,10 @@ class ProjectMemberSerializer(serializers.ModelSerializer):
 
 
 class AddMemberSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
+    email = serializers.EmailField()
 
-    def validate_user_id(self, value):
-        if not User.objects.filter(id=value).exists():
-            raise serializers.ValidationError("User not found.")
-        return value
+    def validate_email(self, value):
+        if not User.objects.filter(email=value.strip()).exists():
+            raise serializers.ValidationError("User with this email does not exist.")
+        return value.strip()
+

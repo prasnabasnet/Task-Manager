@@ -132,13 +132,25 @@ class AddProjectMemberService(BaseService):
         project = self.project
         requesting_user = self.requesting_user
 
-        if requesting_user.role != "ADMIN" and project.owner != requesting_user:
+        if requesting_user.role not in ("SUPERADMIN", "ORG_ADMIN") and project.owner != requesting_user:
             raise PermissionDenied("Only the project owner or admin can add members.")
 
-        try:
-            user_to_add = User.objects.get(id=self.user_id)
-        except User.DoesNotExist:
-            raise ValidationError("User not found.")
+        email = getattr(self, "email", None)
+        user_id = getattr(self, "user_id", None)
+
+        if email:
+            try:
+                user_to_add = User.objects.get(email=email.strip())
+            except User.DoesNotExist:
+                raise ValidationError("User not found.")
+        elif user_id:
+            try:
+                user_to_add = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                raise ValidationError("User not found.")
+        else:
+            raise ValidationError("Email or user_id is required.")
+
 
         if ProjectMember.objects.filter(project=project, user=user_to_add).exists():
             raise Conflict("User is already a member of this project.")

@@ -20,7 +20,7 @@ class IsProjectMember(permissions.BasePermission):
         if not (request.user and request.user.is_authenticated):
             return False
 
-        if getattr(request.user, "role", None) == "ADMIN":
+        if getattr(request.user, "role", None) in ("SUPERADMIN", "ORG_ADMIN") or getattr(request.user, "is_superuser", False):
             return True
 
         if isinstance(obj, Organization):
@@ -55,15 +55,17 @@ class IsProjectMember(permissions.BasePermission):
         )
 
 
+
 class IsCommentAuthorOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if not (request.user and request.user.is_authenticated):
             return False
 
-        if request.user.role == "ADMIN":
+        if request.user.role in ("SUPERADMIN", "ORG_ADMIN") or request.user.is_superuser:
             return True
 
         if request.method in permissions.SAFE_METHODS:
             return True
 
         return obj.author == request.user
+

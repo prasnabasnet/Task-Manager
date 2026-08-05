@@ -49,8 +49,12 @@ export const projectsApi = {
   update: (id, body) => api.patch(`/projects/${id}/`, body),
   remove: (id) => api.delete(`/projects/${id}/`),
   listMembers: (id) => api.get(`/projects/${id}/members/`),
-  addMember: (id, user_id) =>
-    api.post(`/projects/${id}/members/`, { user_id }),
+  addMember: (id, emailOrData) =>
+    api.post(
+      `/projects/${id}/members/`,
+      typeof emailOrData === 'object' ? emailOrData : { email: emailOrData }
+    ),
+
   removeMember: (id, uid) => api.delete(`/projects/${id}/members/${uid}/`),
 }
 
