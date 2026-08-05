@@ -7,7 +7,7 @@ import { ErrorBanner } from '../components/ui'
 export default function Register() {
   const { user, register } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ email: '', username: '', password: '' })
+  const [form, setForm] = useState({ email: '', username: '', password: '', organization_name: '' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -34,11 +34,22 @@ export default function Register() {
       <form className="auth-card" onSubmit={onSubmit}>
         <div className="auth-brand">
           <span className="brand-mark">TM</span>
-          <h1>Sign up</h1>
-          <p className="muted">New users join as Team Members (TM)</p>
+          <h1>Create Organization</h1>
+          <p className="muted">Sign up as Organization Admin (ORG_ADMIN)</p>
         </div>
 
         <ErrorBanner message={error} onDismiss={() => setError('')} />
+
+        <label className="field">
+          <span>Organization Name</span>
+          <input
+            name="organization_name"
+            value={form.organization_name}
+            onChange={onChange}
+            placeholder="e.g. Acme Corp"
+            required
+          />
+        </label>
 
         <label className="field">
           <span>Email</span>

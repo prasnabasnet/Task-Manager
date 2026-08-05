@@ -16,7 +16,7 @@ export default function Projects() {
   const [form, setForm] = useState({ name: '', description: '', department: '', member_ids: [] })
   const [busy, setBusy] = useState(false)
 
-  const canCreate = user?.role === 'ADMIN' || user?.role === 'PM'
+  const canCreate = ['SUPERADMIN', 'ORG_ADMIN', 'PM', 'ADMIN'].includes(user?.role)
 
   const load = async () => {
     setLoading(true)

@@ -15,7 +15,7 @@ class BaseDepartmentService(BaseService):
         except Organization.DoesNotExist:
             raise NotFound("Organization not found")
 
-        if not (getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN"):
+        if not (getattr(user, "role", "") == "SUPERADMIN" or getattr(user, "is_superuser", False)):
             is_owner = org.owner == user
             is_member = (
                 org.memberships.filter(user=user).exists()
@@ -38,6 +38,11 @@ User = get_user_model()
 
 
 class CreateDepartmentService(BaseDepartmentService):
+    def validate(self):
+        user_role = getattr(self.user, "role", "")
+        if user_role not in ("SUPERADMIN", "ORG_ADMIN") and not getattr(self.user, "is_superuser", False):
+            raise PermissionDenied("Only Organization Admins can create departments.")
+
     def process(self):
         org = self.get_organization(self.organization_id, self.user)
         if isinstance(self.data, dict) and any(
@@ -49,16 +54,18 @@ class CreateDepartmentService(BaseDepartmentService):
         return serializer.save(organization=org)
 
 
+
 class GetDepartmentProjectService(BaseService):
     def process(self):
         user = self.user
-        if getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN":
+        if getattr(user, "role", "") in ("SUPERADMIN", "ORG_ADMIN") or getattr(user, "is_superuser", False):
             return self.department.projects.all()
         return (
             self.department.projects.filter(owner=user)
             | self.department.projects.filter(members=user)
             | self.department.projects.filter(tasks__assignees=user)
         ).distinct()
+
 
 
 class CreateProjectService(BaseService):

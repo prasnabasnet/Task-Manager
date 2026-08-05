@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Type
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from rest_framework.exceptions import (
     APIException,
     AuthenticationFailed,
@@ -62,6 +62,9 @@ class BaseService:
             AuthenticationFailed,
         ):
             raise
+        except IntegrityError as exc:
+            cls.log_error(cls.__name__, exc)
+            raise ValidationError("A database integrity constraint was violated (e.g. duplicate name or email).") from exc
         except Exception as exc:
             cls.log_error(cls.__name__, exc)
             raise APIException(

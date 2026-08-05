@@ -42,6 +42,38 @@ def send_welcome_email_task(self, user_id: int):
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def send_member_welcome_email_task(self, email: str, raw_password: str, organization_name: str = ""):
+    """
+    Task to email a newly created team member/PM their login credentials.
+    """
+    try:
+        subject = "Your Task Manager Account Details"
+        org_info = f" for organization '{organization_name}'" if organization_name else ""
+        message = (
+            f"Hello,\n\n"
+            f"An account has been created for you{org_info} in Task Manager.\n\n"
+            f"Here are your login credentials:\n"
+            f"- Email: {email}\n"
+            f"- Password: {raw_password}\n\n"
+            f"Please log in and change your password as soon as possible.\n\n"
+            f"Best regards,\n"
+            f"The Task Manager Team"
+        )
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+        )
+        logger.info(f"[send_member_welcome_email_task] Member credentials successfully sent to {email}.")
+    except Exception as exc:
+        logger.error(f"[send_member_welcome_email_task] Error sending member welcome email to {email}: {exc}", exc_info=True)
+        raise self.retry(exc=exc)
+
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_task_completion_email_task(self, task_id: int):
     """
     Task to send an email notification when a task status moves to 'DONE'.

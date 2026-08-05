@@ -91,9 +91,10 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         description="Role",
         ordering="role",
         label={
-            RoleChoices.ADMIN: "danger",
-            RoleChoices.PROJECT_MANAGER: "info",
-            RoleChoices.TEAM_MEMBER: "success",
+            RoleChoices.SUPERADMIN: "danger",
+            RoleChoices.ORG_ADMIN: "warning",
+            RoleChoices.PM: "info",
+            RoleChoices.TM: "success",
         },
     )
     def display_role(self, obj):

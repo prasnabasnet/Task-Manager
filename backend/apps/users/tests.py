@@ -29,33 +29,32 @@ class AuthAPITestCase(TestCase):
         self.me_url = reverse("me")
 
     def test_register_success(self):
-        # Username is now required in the registration payload
         data = {
             "email": "newuser@example.com",
             "username": "newuser",
             "password": "NewPass123",
-            "role": "PM",
+            "organization_name": "Acme Corp",
         }
         response = self.client.post(self.register_url, data, format="json")
         self.assertEqual(response.status_code, 201)
         self.assertIn("token", response.data)
         self.assertEqual(response.data["user"]["email"], "newuser@example.com")
         self.assertEqual(response.data["user"]["username"], "newuser")
-        self.assertTrue(User.objects.filter(email="newuser@example.com").exists())
+        user = User.objects.get(email="newuser@example.com")
+        self.assertEqual(user.role, "ORG_ADMIN")
 
-    def test_register_ignores_role_override(self):
-        # Verify that users cannot register themselves as ADMIN
+    def test_register_creates_org_admin(self):
         data = {
             "email": "attacker@example.com",
             "username": "attacker",
             "password": "AttackPass123",
-            "role": "ADMIN",
+            "organization_name": "Initech",
         }
         response = self.client.post(self.register_url, data, format="json")
         self.assertEqual(response.status_code, 201)
         user = User.objects.get(email="attacker@example.com")
-        # Role should default to TM regardless of input
-        self.assertEqual(user.role, "TM")
+        self.assertEqual(user.role, "ORG_ADMIN")
+
 
     def test_login_success(self):
         data = {"email": "test@example.com", "password": "testpass123"}
@@ -281,10 +280,13 @@ class UserServiceTestCase(TestCase):
             "email": "serviceuser@example.com",
             "username": "serviceuser",
             "password": "ServicePass123",
+            "organization_name": "Test Org",
         }
         user, token = RegisterUserService.execute(data=data)
         self.assertEqual(user.email, "serviceuser@example.com")
+        self.assertEqual(user.role, "ORG_ADMIN")
         self.assertIsNotNone(token.key)
+
 
     def test_service_authenticate_user(self):
         from apps.users.services import AuthenticateUserService

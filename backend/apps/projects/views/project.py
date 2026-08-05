@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import models
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
@@ -28,17 +29,26 @@ class ProjectViewSet(viewsets.ModelViewSet):
     # controls which porjects can this specific user even see
     def get_queryset(self):
         user = self.request.user
-        base_queryset = Project.objects.select_related("owner").annotate(
+        base_queryset = Project.objects.select_related("owner", "department").annotate(
             member_count=Count("members", distinct=True),
             task_count=Count("tasks", distinct=True),
         )
-        if getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN":
+        if getattr(user, "role", "") == "SUPERADMIN" or getattr(user, "is_superuser", False):
             return base_queryset
-        return (
-            base_queryset.filter(owner=user)
-            | base_queryset.filter(members=user)
-            | base_queryset.filter(tasks__assignees=user)
+        if getattr(user, "role", "") == "ORG_ADMIN":
+            return base_queryset.filter(
+                models.Q(department__organization__owner=user)
+                | models.Q(department__organization__memberships__user=user)
+            ).distinct()
+        if getattr(user, "role", "") == "PM":
+            return base_queryset.filter(
+                models.Q(department__head=user) | models.Q(department__members=user) | models.Q(owner=user)
+            ).distinct()
+        # TM role
+        return base_queryset.filter(
+            models.Q(members=user) | models.Q(tasks__assignees=user)
         ).distinct()
+
 
     def get_permissions(self):
         if self.action == "create":

@@ -6,7 +6,7 @@ class IsAdmin(BasePermission):
         return bool(
             request.user
             and request.user.is_authenticated
-            and (request.user.role == "ADMIN" or request.user.is_superuser)
+            and (request.user.role in ("SUPERADMIN", "ORG_ADMIN") or request.user.is_superuser)
         )
 
 
@@ -15,20 +15,20 @@ class IsSelfOrAdmin(BasePermission):
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        return request.user.role == "ADMIN" or obj == request.user
+        return request.user.role in ("SUPERADMIN", "ORG_ADMIN") or obj == request.user
 
 
 class IsAdminOrOrgOwner(BasePermission):
     """
-    Permission to check if the user is a site Admin OR the owner
-    of the organization associated with the request.
+    Permission to check if the user is a SUPERADMIN OR an ORG_ADMIN
+    belonging to the same organization as the object / request.
     """
 
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
-        if request.user.role == "ADMIN" or request.user.is_superuser:
-            return True
+        if request.user.role not in ("SUPERADMIN", "ORG_ADMIN") and not request.user.is_superuser:
+            return False
 
         oid = view.kwargs.get("oid")
         if oid:
@@ -36,16 +36,27 @@ class IsAdminOrOrgOwner(BasePermission):
 
             try:
                 org = Organization.objects.get(pk=oid)
-                return org.owner == request.user
+                return org.owner == request.user or org.memberships.filter(user=request.user).exists()
             except Organization.DoesNotExist:
                 return False
-        return False
+        return True
+
 
     def has_object_permission(self, request, view, obj):
-        if request.user.role == "ADMIN" or request.user.is_superuser:
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if request.user.role == "SUPERADMIN" or request.user.is_superuser:
             return True
-        # Assumes the object has an 'organization' attribute
-        return (
-            getattr(obj, "organization", None)
-            and obj.organization.owner == request.user
-        )
+
+        # Check object organization ownership / membership
+        org = getattr(obj, "organization", None)
+        if not org and hasattr(obj, "department"):
+            org = getattr(obj.department, "organization", None)
+        if not org and hasattr(obj, "project"):
+            org = getattr(obj.project.department, "organization", None)
+
+        if org and request.user.role == "ORG_ADMIN":
+            return org.owner == request.user or org.memberships.filter(user=request.user).exists()
+
+        return False
+

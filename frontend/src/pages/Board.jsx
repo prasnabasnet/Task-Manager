@@ -20,7 +20,7 @@ export default function Board() {
   const [project, setProject] = useState(null)
 
   const canCreateTask =
-    user?.role === 'ADMIN' || user?.role === 'PM' || (project && project.owner?.id === user?.id)
+    ['SUPERADMIN', 'ORG_ADMIN', 'PM', 'ADMIN'].includes(user?.role) || (project && project.owner?.id === user?.id)
   const [tasks, setTasks] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)

@@ -5,9 +5,10 @@ from apps.users.models.usermanager import UserManager
 
 
 class RoleChoices(models.TextChoices):
-    ADMIN = "ADMIN", "Admin"
-    PROJECT_MANAGER = "PM", "Project Manager"
-    TEAM_MEMBER = "TM", "Team Member"
+    SUPERADMIN = "SUPERADMIN", "Super Admin"
+    ORG_ADMIN = "ORG_ADMIN", "Org Admin"
+    PM = "PM", "Project Manager"
+    TM = "TM", "Team Member"
 
 
 class User(AbstractUser):
@@ -16,7 +17,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     role = models.CharField(
-        max_length=15, choices=RoleChoices.choices, default=RoleChoices.TEAM_MEMBER
+        max_length=15, choices=RoleChoices.choices, default=RoleChoices.TM
     )
 
     USERNAME_FIELD = "email"
@@ -25,7 +26,8 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == RoleChoices.ADMIN or self.is_superuser
+        return self.role in (RoleChoices.SUPERADMIN, RoleChoices.ORG_ADMIN) or self.is_superuser
 
     def __str__(self):
         return f"{self.username} ({self.email})"
+

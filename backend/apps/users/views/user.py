@@ -12,6 +12,7 @@ from apps.users.serializers import (
 )
 from apps.users.services import (
     AuthenticateUserService,
+    CreateMemberService,
     LogoutUserService,
     RegisterUserService,
     UpdateProfileService,
@@ -47,6 +48,15 @@ class RegisterView(viewsets.ModelViewSet):
             {"user": UserDetailSerializer(user).data, "token": token.key},
             status=status.HTTP_201_CREATED,
         )
+
+
+class MemberCreateView(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        new_user = CreateMemberService.execute(user=request.user, data=request.data)
+        return Response(UserDetailSerializer(new_user).data, status=status.HTTP_201_CREATED)
+
 
 
 @extend_schema(
