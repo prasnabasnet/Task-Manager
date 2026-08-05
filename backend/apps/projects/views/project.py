@@ -53,6 +53,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
             name=self.request.data.get("name"),
             description=self.request.data.get("description", ""),
             department=self.request.data.get("department"),
+            member_ids=self.request.data.get("member_ids", []),
         )
         serializer.instance = project
 

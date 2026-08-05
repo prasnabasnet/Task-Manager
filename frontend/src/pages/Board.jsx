@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { projectsApi, tasksApi } from '../api'
 import ApiHint from '../components/ApiHint'
 import { ErrorBanner, Modal, PriorityBadge } from '../components/ui'
+import { useAuth } from '../context/AuthContext'
 import { useTaskSocket } from '../hooks/useProjectSocket'
 import TaskDetail from './TaskDetail'
 
@@ -13,9 +14,13 @@ const COLUMNS = [
 ]
 
 export default function Board() {
+  const { user } = useAuth()
   const { projectId } = useParams()
   const navigate = useNavigate()
   const [project, setProject] = useState(null)
+
+  const canCreateTask =
+    user?.role === 'ADMIN' || user?.role === 'PM' || (project && project.owner?.id === user?.id)
   const [tasks, setTasks] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -136,10 +141,12 @@ export default function Board() {
           >
             Backlog
           </button>
-          <button type="button" className="btn btn-primary" onClick={() => setShowCreate(true)}>
-            Create issue
-            <ApiHint method="POST" path="/api/tasks/" />
-          </button>
+          {canCreateTask && (
+            <button type="button" className="btn btn-primary" onClick={() => setShowCreate(true)}>
+              Create issue
+              <ApiHint method="POST" path="/api/tasks/" />
+            </button>
+          )}
         </div>
       </div>
 
