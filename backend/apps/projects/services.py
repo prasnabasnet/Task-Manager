@@ -33,16 +33,18 @@ class CreateProjectService(BaseService):
         except Department.DoesNotExist:
             raise ValidationError({"department": "Department not found."})
 
-        # Check PM department restriction: PM must be head or member of department
-        if getattr(self.user, "role", "") == "PM" and not getattr(
-            self.user, "is_admin", False
-        ):
-            is_head = department.head_id == self.user.id
-            is_dept_member = department.members.filter(id=self.user.id).exists()
-            if not (is_head or is_dept_member):
-                raise PermissionDenied(
-                    "Project Managers can only create projects within their own department."
-                )
+        user_role = getattr(self.user, "role", "")
+        if user_role not in ("SUPERADMIN", "ORG_ADMIN") and not getattr(self.user, "is_superuser", False):
+            if user_role == "PM":
+                is_head = department.head_id == self.user.id
+                is_dept_member = department.members.filter(id=self.user.id).exists()
+                if not (is_head or is_dept_member):
+                    raise PermissionDenied(
+                        "Project Managers can only create projects within their assigned department."
+                    )
+            else:
+                raise PermissionDenied("Team Members are not allowed to create projects.")
+
 
     def process(self):
         name = getattr(self, "name", None)

@@ -57,12 +57,12 @@ export default function Layout() {
           >
             Profile
           </NavLink>
-          {user?.role === 'ADMIN' && (
+          {(user?.role === 'SUPERADMIN' || user?.role === 'ORG_ADMIN' || user?.role === 'ADMIN') && (
             <NavLink
               to="/users"
               className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
             >
-              Users
+              Members
             </NavLink>
           )}
 

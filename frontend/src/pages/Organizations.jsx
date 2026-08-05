@@ -288,13 +288,15 @@ export default function Organizations() {
                       <ApiHint method="GET" path={`/api/organizations/${selected.id}/`} />
                     </p>
                   </div>
-                  <button type="button" className="btn btn-primary" onClick={() => setShowDept(true)}>
-                    Add department
-                    <ApiHint
-                      method="POST"
-                      path={`/api/organizations/${selected.id}/departments/`}
-                    />
-                  </button>
+                  {['SUPERADMIN', 'ORG_ADMIN', 'ADMIN'].includes(user?.role) && (
+                    <button type="button" className="btn btn-primary" onClick={() => setShowDept(true)}>
+                      Add department
+                      <ApiHint
+                        method="POST"
+                        path={`/api/organizations/${selected.id}/departments/`}
+                      />
+                    </button>
+                  )}
                 </div>
 
                 <h3>

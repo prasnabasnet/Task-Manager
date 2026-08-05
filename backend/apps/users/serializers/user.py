@@ -22,17 +22,18 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
+    organization_name = serializers.CharField(write_only=True, required=True)
     password = serializers.CharField(
         write_only=True, required=True, validators=[validate_password]
     )
 
     class Meta:
         model = User
-        fields = ["email", "username", "password"]
+        fields = ["email", "username", "password", "organization_name"]
 
     def create(self, validated_data):
-        # Default role for new registrations is Team Member
-        validated_data["role"] = "TM"
+        validated_data.pop("organization_name", None)
+        validated_data["role"] = "ORG_ADMIN"
         password = validated_data.pop("password")
         return User.objects.create_user(password=password, **validated_data)
 

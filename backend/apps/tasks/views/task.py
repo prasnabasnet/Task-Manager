@@ -1,3 +1,4 @@
+from django.db import models
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets, status
 from rest_framework.exceptions import PermissionDenied
@@ -33,13 +34,25 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if getattr(user, "is_admin", False) or getattr(user, "role", "") == "ADMIN":
-            return Task.objects.all()
-        return (
-            Task.objects.filter(project__owner=user)
-            | Task.objects.filter(project__members=user)
-            | Task.objects.filter(assignees=user)
-        ).distinct()
+        base_qs = Task.objects.select_related("project", "created_by").prefetch_related("assignees")
+        if getattr(user, "role", "") == "SUPERADMIN" or getattr(user, "is_superuser", False):
+            return base_qs.all()
+        if getattr(user, "role", "") == "ORG_ADMIN":
+            return base_qs.filter(
+                Task.objects.model.project.field.related_model.department.field.related_model.organization.field.related_model.owner == user
+            ) if False else base_qs.filter(
+                models.Q(project__department__organization__owner=user)
+                | models.Q(project__department__organization__memberships__user=user)
+            ).distinct()
+        if getattr(user, "role", "") == "PM":
+            return base_qs.filter(
+                models.Q(project__department__head=user)
+                | models.Q(project__department__members=user)
+                | models.Q(project__owner=user)
+            ).distinct()
+        # TM role: only tasks assigned to them
+        return base_qs.filter(assignees=user).distinct()
+
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

@@ -15,14 +15,20 @@ from apps.tasks.serializers import TaskSerializer
 class CreateTaskService(BaseService):
     def validate(self) -> None:
         project = self.validated_data.get("project")
+        user_role = getattr(self.user, "role", "")
         can_create = (
-            getattr(self.user, "is_admin", False)
-            or getattr(self.user, "role", "") in ("ADMIN", "PM")
-            or project.owner == self.user
+            user_role in ("SUPERADMIN", "ORG_ADMIN")
+            or getattr(self.user, "is_superuser", False)
+            or (user_role == "PM" and (
+                project.department.head_id == self.user.id
+                or project.department.members.filter(id=self.user.id).exists()
+                or project.owner_id == self.user.id
+            ))
         )
         self.check_permission(
             can_create, "Team members are not allowed to create tasks."
         )
+
 
     def process(self) -> Task:
         assignees = self.validated_data.pop("assignees", [])
@@ -58,10 +64,15 @@ class CreateTaskService(BaseService):
 
 class UpdateTaskService(BaseService):
     def validate(self) -> None:
+        user_role = getattr(self.user, "role", "")
         is_elevated = (
-            getattr(self.user, "is_admin", False)
-            or getattr(self.user, "role", "") in ("ADMIN", "PM")
-            or self.task.project.owner == self.user
+            user_role in ("SUPERADMIN", "ORG_ADMIN")
+            or getattr(self.user, "is_superuser", False)
+            or (user_role == "PM" and (
+                self.task.project.department.head_id == self.user.id
+                or self.task.project.department.members.filter(id=self.user.id).exists()
+                or self.task.project.owner_id == self.user.id
+            ))
             or self.task.created_by_id == self.user.id
         )
 

@@ -15,6 +15,7 @@ export const usersApi = {
   get: (id) => api.get(`/users/${id}/`),
   update: (id, body) => api.patch(`/users/${id}/`, body),
   deactivate: (id) => api.delete(`/users/${id}/`),
+  createMember: (body) => api.post('/users/members/', body),
 }
 
 export const orgsApi = {
