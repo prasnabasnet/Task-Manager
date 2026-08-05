@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import models
 from rest_framework.exceptions import NotFound, PermissionDenied
 
 from apps.department.models import Department
@@ -31,7 +32,20 @@ class BaseDepartmentService(BaseService):
 class GetDepartmentService(BaseDepartmentService):
     def process(self):
         org = self.get_organization(self.organization_id, self.user)
-        return org.departments.all()
+        user = self.user
+        if getattr(user, "role", "") in ("SUPERADMIN", "ORG_ADMIN") or getattr(user, "is_superuser", False):
+            return org.departments.all()
+        if getattr(user, "role", "") == "PM":
+            return org.departments.filter(
+                models.Q(head=user) | models.Q(members=user) | models.Q(projects__owner=user)
+            ).distinct()
+        # TM role: only departments where they are a member or assigned to projects/tasks
+        return org.departments.filter(
+            models.Q(members=user)
+            | models.Q(projects__members=user)
+            | models.Q(projects__tasks__assignees=user)
+        ).distinct()
+
 
 
 User = get_user_model()

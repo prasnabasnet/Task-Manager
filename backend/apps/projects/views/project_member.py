@@ -35,9 +35,17 @@ class ProjectMemberListAddView(views.APIView):
             )
 
         if (
-            request.user.role != "ADMIN"
+            request.user.role not in ("SUPERADMIN", "ORG_ADMIN")
+            and not request.user.is_superuser
             and not project.members.filter(id=request.user.id).exists()
             and project.owner != request.user
+            and not (
+                request.user.role == "PM"
+                and (
+                    project.department.head_id == request.user.id
+                    or project.department.members.filter(id=request.user.id).exists()
+                )
+            )
         ):
             return Response(
                 {
@@ -46,6 +54,7 @@ class ProjectMemberListAddView(views.APIView):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
+
 
         members = ProjectMember.objects.filter(project=project).select_related("user")
         serializer = ProjectMemberSerializer(members, many=True)
@@ -68,8 +77,10 @@ class ProjectMemberListAddView(views.APIView):
         membership = AddProjectMemberService.execute(
             project=project,
             requesting_user=request.user,
+            email=request.data.get("email"),
             user_id=request.data.get("user_id"),
         )
+
 
         return Response(
             {

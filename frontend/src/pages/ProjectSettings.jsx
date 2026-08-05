@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { projectsApi } from '../api'
+import { projectsApi, usersApi } from '../api'
 import ApiHint from '../components/ApiHint'
 import { ErrorBanner, Modal } from '../components/ui'
 import { useProjectSocket } from '../hooks/useProjectSocket'
@@ -11,7 +11,8 @@ export default function ProjectSettings() {
   const [project, setProject] = useState(null)
   const [members, setMembers] = useState([])
   const [form, setForm] = useState({ name: '', description: '' })
-  const [userId, setUserId] = useState('')
+  const [orgUsers, setOrgUsers] = useState([])
+  const [selectedEmail, setSelectedEmail] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -19,13 +20,24 @@ export default function ProjectSettings() {
   const load = useCallback(async () => {
     setError('')
     try {
-      const [proj, memberList] = await Promise.all([
+      const [proj, memberList, userList] = await Promise.all([
         projectsApi.get(projectId),
         projectsApi.listMembers(projectId),
+        usersApi.list(),
       ])
       setProject(proj)
       setForm({ name: proj.name, description: proj.description || '' })
-      setMembers(Array.isArray(memberList) ? memberList : memberList.results || [])
+      const existingMembers = Array.isArray(memberList) ? memberList : memberList.results || []
+      setMembers(existingMembers)
+      const allOrgUsers = Array.isArray(userList) ? userList : userList.results || []
+      setOrgUsers(allOrgUsers)
+      const existingEmails = new Set(existingMembers.map((m) => m.email))
+      const available = allOrgUsers.filter((u) => !existingEmails.has(u.email))
+      if (available.length > 0) {
+        setSelectedEmail(available[0].email)
+      } else {
+        setSelectedEmail('')
+      }
     } catch (err) {
       setError(err.message)
     }
@@ -57,11 +69,12 @@ export default function ProjectSettings() {
 
   const addMember = async (e) => {
     e.preventDefault()
+    if (!selectedEmail) return
     setBusy(true)
     setError('')
     try {
-      await projectsApi.addMember(projectId, Number(userId))
-      setUserId('')
+      await projectsApi.addMember(projectId, selectedEmail)
+      setSelectedEmail('')
       await load()
     } catch (err) {
       setError(err.message)
@@ -69,6 +82,7 @@ export default function ProjectSettings() {
       setBusy(false)
     }
   }
+
 
   const removeMember = async (uid) => {
     setBusy(true)
@@ -169,14 +183,22 @@ export default function ProjectSettings() {
           </ul>
 
           <form onSubmit={addMember} className="row">
-            <input
-              type="number"
-              placeholder="User ID"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
+            <select
+              value={selectedEmail}
+              onChange={(e) => setSelectedEmail(e.target.value)}
               required
-            />
-            <button type="submit" className="btn btn-primary" disabled={busy}>
+              style={{ flex: 1 }}
+            >
+              <option value="">Select a team member...</option>
+              {orgUsers
+                .filter((u) => !members.some((m) => m.email === u.email))
+                .map((u) => (
+                  <option key={u.id} value={u.email}>
+                    {u.email} ({u.role})
+                  </option>
+                ))}
+            </select>
+            <button type="submit" className="btn btn-primary" disabled={busy || !selectedEmail}>
               Add member
               <ApiHint method="POST" path={`/api/projects/${projectId}/members/`} />
             </button>
