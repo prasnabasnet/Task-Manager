@@ -74,6 +74,5 @@ class DepartmentSerializer(serializers.ModelSerializer):
         )
         return len(direct_members.union(project_members))
 
-
     def get_project_count(self, obj):
         return obj.projects.count()

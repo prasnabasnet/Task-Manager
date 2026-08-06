@@ -37,7 +37,11 @@ class GetDepartmentService(BaseDepartmentService):
             return org.departments.all()
         if getattr(user, "role", "") == "PM":
             return org.departments.filter(
-                models.Q(head=user) | models.Q(members=user) | models.Q(projects__owner=user)
+                models.Q(head=user)
+                | models.Q(members=user)
+                | models.Q(projects__owner=user)
+                | models.Q(projects__members=user)
+                | models.Q(projects__tasks__assignees=user)
             ).distinct()
         # TM role: only departments where they are a member or assigned to projects/tasks
         return org.departments.filter(
@@ -45,6 +49,7 @@ class GetDepartmentService(BaseDepartmentService):
             | models.Q(projects__members=user)
             | models.Q(projects__tasks__assignees=user)
         ).distinct()
+
 
 
 
