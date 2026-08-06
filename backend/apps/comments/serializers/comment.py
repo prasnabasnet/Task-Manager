@@ -1,7 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
-from apps.comments.mention_parser import parse_mentions
 from apps.comments.models import Comment
 from apps.users.serializers import UserDetailSerializer
 
@@ -121,15 +120,10 @@ class CommentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop("target_type", None)
         validated_data.pop("target_id", None)
-        comment = super().create(validated_data)
-        users = parse_mentions(comment.body)
-        comment.mentions.set(users)
-        return comment
+        return super().create(validated_data)
 
     def update(self, instance, validated_data):
         validated_data.pop("target_type", None)
         validated_data.pop("target_id", None)
-        instance = super().update(instance, validated_data)
-        users = parse_mentions(instance.body)
-        instance.mentions.set(users)
-        return instance
+        return super().update(instance, validated_data)
+
