@@ -37,21 +37,22 @@ class TaskViewSet(viewsets.ModelViewSet):
         base_qs = Task.objects.select_related("project", "created_by").prefetch_related("assignees")
         if getattr(user, "role", "") == "SUPERADMIN" or getattr(user, "is_superuser", False):
             return base_qs.all()
-        if getattr(user, "role", "") == "ORG_ADMIN":
+        if getattr(user, "role", "") in ("ORG_ADMIN", "PM"):
             return base_qs.filter(
-                Task.objects.model.project.field.related_model.department.field.related_model.organization.field.related_model.owner == user
-            ) if False else base_qs.filter(
                 models.Q(project__department__organization__owner=user)
                 | models.Q(project__department__organization__memberships__user=user)
-            ).distinct()
-        if getattr(user, "role", "") == "PM":
-            return base_qs.filter(
-                models.Q(project__department__head=user)
+                | models.Q(project__department__head=user)
                 | models.Q(project__department__members=user)
                 | models.Q(project__owner=user)
+                | models.Q(project__members=user)
+                | models.Q(assignees=user)
             ).distinct()
-        # TM role: only tasks assigned to them
-        return base_qs.filter(assignees=user).distinct()
+        # TM role: tasks in projects they belong to or are assigned to
+        return base_qs.filter(
+            models.Q(assignees=user)
+            | models.Q(project__members=user)
+        ).distinct()
+
 
 
     def create(self, request, *args, **kwargs):

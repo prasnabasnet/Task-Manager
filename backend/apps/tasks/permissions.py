@@ -15,7 +15,7 @@ class IsProjectMemberForTask(BasePermission):
 
 class CanModifyTask(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if getattr(request.user, "role", "") in ("SUPERADMIN", "ORG_ADMIN") or request.user.is_superuser:
+        if getattr(request.user, "role", "") in ("SUPERADMIN", "ORG_ADMIN", "PM") or request.user.is_superuser:
             return True
         if obj.project.owner == request.user:
             return True
@@ -28,9 +28,10 @@ class CanModifyTask(BasePermission):
 
 class CanDeleteTask(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if getattr(request.user, "role", "") in ("SUPERADMIN", "ORG_ADMIN") or request.user.is_superuser:
+        if getattr(request.user, "role", "") in ("SUPERADMIN", "ORG_ADMIN", "PM") or request.user.is_superuser:
             return True
         if obj.created_by_id == request.user.id:
             return True
         return False
+
 

@@ -35,20 +35,19 @@ class ProjectViewSet(viewsets.ModelViewSet):
         )
         if getattr(user, "role", "") == "SUPERADMIN" or getattr(user, "is_superuser", False):
             return base_queryset
-        if getattr(user, "role", "") == "ORG_ADMIN":
+        if getattr(user, "role", "") in ("ORG_ADMIN", "PM"):
             return base_queryset.filter(
                 models.Q(department__organization__owner=user)
                 | models.Q(department__organization__memberships__user=user)
-            ).distinct()
-        if getattr(user, "role", "") == "PM":
-            return base_queryset.filter(
-                models.Q(department__head=user) | models.Q(department__members=user) | models.Q(owner=user)
+                | models.Q(department__head=user)
+                | models.Q(department__members=user)
+                | models.Q(owner=user)
+                | models.Q(members=user)
             ).distinct()
         # TM role
         return base_queryset.filter(
             models.Q(members=user) | models.Q(tasks__assignees=user)
         ).distinct()
-
 
     def get_permissions(self):
         if self.action == "create":
@@ -56,6 +55,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         if self.action in ("update", "partial_update", "destroy"):
             return [IsProjectOwnerOrAdmin()]
         return [IsProjectMemberOrAdmin()]
+
 
     def perform_create(self, serializer):
         project = CreateProjectService.execute(
