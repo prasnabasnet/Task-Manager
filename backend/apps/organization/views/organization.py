@@ -9,13 +9,11 @@ from apps.organization.serializers import OrganizationSerializer
 class OrganizationViewSet(viewsets.ModelViewSet):
     serializer_class = OrganizationSerializer
     queryset = Organization.objects.all()
+    http_method_names = ["get", "patch", "put", "head", "options"]
 
     def get_permissions(self):
-        if self.action in ["update", "partial_update", "destroy"]:
-            return [IsAdminOrOwner()]
-        if self.action == "create":
-            return [CanCreateOrganization()]
         return [IsAuthenticated()]
+
 
     def get_queryset(self):
         user = self.request.user

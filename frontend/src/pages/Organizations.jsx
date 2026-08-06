@@ -154,16 +154,10 @@ export default function Organizations() {
         <div>
           <h1>Organizations</h1>
           <p className="muted">
-            Manage orgs, departments, and projects
+            View orgs, departments, and projects
             <ApiHint method="GET" path="/api/organizations/" />
           </p>
         </div>
-        {user?.role !== 'TM' && (
-          <button type="button" className="btn btn-primary" onClick={() => setShowOrg(true)}>
-            Create organization
-            <ApiHint method="POST" path="/api/organizations/" />
-          </button>
-        )}
       </div>
 
       <ErrorBanner message={error} onDismiss={() => setError('')} />
@@ -180,14 +174,6 @@ export default function Organizations() {
                   <button type="button" className="list-main" onClick={() => setSelected(o)}>
                     <strong>{o.name}</strong>
                     <div className="muted small">{o.slug}</div>
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm danger"
-                    onClick={() => deleteOrg(o.id)}
-                  >
-                    Delete
-                    <ApiHint method="DELETE" path={`/api/organizations/${o.id}/`} />
                   </button>
                 </li>
               ))}
