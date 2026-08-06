@@ -81,12 +81,14 @@ export default function Layout() {
               >
                 Backlog
               </NavLink>
-              <NavLink
-                to={`/projects/${projectId}/settings`}
-                className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-              >
-                Settings
-              </NavLink>
+              {user?.role !== 'TM' && (
+                <NavLink
+                  to={`/projects/${projectId}/settings`}
+                  className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+                >
+                  Settings
+                </NavLink>
+              )}
               <button
                 type="button"
                 className={showProjectComments ? 'nav-item active' : 'nav-item'}

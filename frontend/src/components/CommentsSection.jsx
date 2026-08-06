@@ -150,7 +150,7 @@ export default function CommentsSection({ targetType, targetId }) {
         )}
         <textarea
           rows={3}
-          placeholder="Add a comment… Use @username to mention"
+          placeholder="Add a comment"
           value={commentBody}
           onChange={(e) => setCommentBody(e.target.value)}
           style={{ width: '100%', resize: 'vertical' }}

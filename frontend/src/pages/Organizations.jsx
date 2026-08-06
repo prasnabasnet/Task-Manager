@@ -277,6 +277,7 @@ export default function Organizations() {
                     </tbody>
                   </table>
                 )}
+                <CommentsSection targetType="department" targetId={selectedDept.id} />
               </>
             ) : (
               <>
@@ -361,9 +362,9 @@ export default function Organizations() {
                     </tbody>
                   </table>
                 )}
+                <CommentsSection targetType="organization" targetId={selected.id} />
               </>
             )}
-            <CommentsSection targetType="organization" targetId={selected.id} />
           </>
           ) : (
             <EmptyState title="Select an organization" subtitle="Details and departments appear here." />

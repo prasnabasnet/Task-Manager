@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import models
 from rest_framework import serializers
 
 from apps.department.models import Department
@@ -62,7 +63,17 @@ class DepartmentSerializer(serializers.ModelSerializer):
         return attrs
 
     def get_member_count(self, obj):
-        return obj.members.count()
+        direct_members = set(obj.members.values_list("id", flat=True))
+        if obj.head_id:
+            direct_members.add(obj.head_id)
+        project_members = set(
+            User.objects.filter(
+                models.Q(project_memberships__project__department=obj)
+                | models.Q(assigned_tasks__project__department=obj)
+            ).values_list("id", flat=True)
+        )
+        return len(direct_members.union(project_members))
+
 
     def get_project_count(self, obj):
         return obj.projects.count()

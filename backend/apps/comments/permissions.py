@@ -23,10 +23,20 @@ class IsProjectMember(permissions.BasePermission):
         if getattr(request.user, "role", None) in ("SUPERADMIN", "ORG_ADMIN") or getattr(request.user, "is_superuser", False):
             return True
 
+        from apps.department.models import Department
+
         if isinstance(obj, Organization):
             return (
                 obj.owner == request.user
                 or obj.memberships.filter(user=request.user).exists()
+            )
+
+        if isinstance(obj, Department):
+            return (
+                obj.organization.owner == request.user
+                or obj.organization.memberships.filter(user=request.user).exists()
+                or obj.head == request.user
+                or obj.members.filter(id=request.user.id).exists()
             )
 
         if isinstance(obj, Project):
@@ -39,6 +49,13 @@ class IsProjectMember(permissions.BasePermission):
                 return (
                     target.owner == request.user
                     or target.memberships.filter(user=request.user).exists()
+                )
+            elif isinstance(target, Department):
+                return (
+                    target.organization.owner == request.user
+                    or target.organization.memberships.filter(user=request.user).exists()
+                    or target.head == request.user
+                    or target.members.filter(id=request.user.id).exists()
                 )
             elif isinstance(target, Project):
                 project = target

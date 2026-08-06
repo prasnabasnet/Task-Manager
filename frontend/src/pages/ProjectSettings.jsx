@@ -3,11 +3,22 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { projectsApi, usersApi } from '../api'
 import ApiHint from '../components/ApiHint'
 import { ErrorBanner, Modal } from '../components/ui'
+import { useAuth } from '../context/AuthContext'
 import { useProjectSocket } from '../hooks/useProjectSocket'
 
 export default function ProjectSettings() {
+  const { user } = useAuth()
   const { projectId } = useParams()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (user?.role === 'TM') {
+      navigate(`/projects/${projectId}/board`, { replace: true })
+    }
+  }, [user, projectId, navigate])
+
+  if (user?.role === 'TM') return null
+
   const [project, setProject] = useState(null)
   const [members, setMembers] = useState([])
   const [form, setForm] = useState({ name: '', description: '' })
