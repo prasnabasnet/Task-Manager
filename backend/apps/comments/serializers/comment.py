@@ -26,7 +26,7 @@ class ReplySerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     target_type = serializers.ChoiceField(
-        choices=["organization", "project", "task"], write_only=True, required=False
+        choices=["organization", "department", "project", "task"], write_only=True, required=False
     )
     target_id = serializers.IntegerField(write_only=True, required=False)
 
@@ -77,6 +77,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
             app_mapping = {
                 "organization": "organization",
+                "department": "department",
                 "project": "projects",
                 "task": "tasks",
             }

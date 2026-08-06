@@ -6,6 +6,7 @@ from apps.shared.services import BaseService
 
 APP_LABEL_MAP = {
     "organization": "organization",
+    "department": "department",
     "project": "projects",
     "task": "tasks",
 }
