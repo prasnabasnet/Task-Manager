@@ -175,6 +175,16 @@ export default function Organizations() {
                     <strong>{o.name}</strong>
                     <div className="muted small">{o.slug}</div>
                   </button>
+                  {(user?.role === 'SUPERADMIN' || user?.is_superuser) && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm danger"
+                      onClick={() => deleteOrg(o.id)}
+                    >
+                      Delete
+                      <ApiHint method="DELETE" path={`/api/organizations/${o.id}/`} />
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
