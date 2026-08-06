@@ -6,9 +6,8 @@ class IsAdminOrOwner(BasePermission):
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        if getattr(request.user, "role", "") in ("SUPERADMIN", "ORG_ADMIN") or request.user.is_superuser:
-            return obj.owner == request.user or request.user.role == "SUPERADMIN" or request.user.is_superuser
-        return False
+        return getattr(request.user, "role", "") == "SUPERADMIN" or request.user.is_superuser
+
 
 
 class CanCreateOrganization(BasePermission):
