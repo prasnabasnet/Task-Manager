@@ -96,7 +96,7 @@ export default function CommentsSection({ targetType, targetId }) {
               >
                 Reply
               </button>
-              {(user?.id === c.author?.id || user?.role === 'ADMIN') && (
+              {(user?.id === c.author?.id || ['SUPERADMIN', 'ORG_ADMIN', 'ADMIN'].includes(user?.role) || user?.is_superuser) && (
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm danger"
@@ -118,7 +118,7 @@ export default function CommentsSection({ targetType, targetId }) {
                 </div>
                 <p style={{ margin: '4px 0' }}>{r.body}</p>
                 <div className="row" style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                  {(user?.id === r.author?.id || user?.role === 'ADMIN') && (
+                  {(user?.id === r.author?.id || ['SUPERADMIN', 'ORG_ADMIN', 'ADMIN'].includes(user?.role) || user?.is_superuser) && (
                     <button
                       type="button"
                       className="btn btn-ghost btn-sm danger"
