@@ -23,11 +23,15 @@ class CreateTaskService(BaseService):
                 project.department.head_id == self.user.id
                 or project.department.members.filter(id=self.user.id).exists()
                 or project.owner_id == self.user.id
+                or project.members.filter(id=self.user.id).exists()
+                or project.department.organization.owner_id == self.user.id
+                or project.department.organization.memberships.filter(user=self.user).exists()
             ))
         )
         self.check_permission(
             can_create, "Team members are not allowed to create tasks."
         )
+
 
 
     def process(self) -> Task:
@@ -72,6 +76,9 @@ class UpdateTaskService(BaseService):
                 self.task.project.department.head_id == self.user.id
                 or self.task.project.department.members.filter(id=self.user.id).exists()
                 or self.task.project.owner_id == self.user.id
+                or self.task.project.members.filter(id=self.user.id).exists()
+                or self.task.project.department.organization.owner_id == self.user.id
+                or self.task.project.department.organization.memberships.filter(user=self.user).exists()
             ))
             or self.task.created_by_id == self.user.id
         )
@@ -83,6 +90,7 @@ class UpdateTaskService(BaseService):
                 raise PermissionDenied(
                     "Team Members are only allowed to change status and priority of a task."
                 )
+
 
     def process(self) -> Task:
         assignees = self.validated_data.pop("assignees", None)
