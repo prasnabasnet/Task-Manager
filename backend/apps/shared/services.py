@@ -106,7 +106,3 @@ class BaseService:
         serializer = serializer_class(data=data, **kwargs)
         serializer.is_valid(raise_exception=True)
         return serializer
-
-    def log_warning(self, message: str) -> None:
-        logger.warning(f"[{self.__class__.__name__}] {message}")
-

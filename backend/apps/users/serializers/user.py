@@ -74,3 +74,17 @@ class UserListSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "email", "username", "role", "date_joined", "profile"]
         read_only_fields = ["id", "email", "date_joined"]
+
+
+class LoginRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(required=True, style={"input_type": "password"})
+
+
+class LoginResponseSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    user = UserDetailSerializer()
+
+
+class LogoutResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()

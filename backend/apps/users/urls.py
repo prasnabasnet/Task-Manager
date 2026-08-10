@@ -1,7 +1,14 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from apps.users.views import LoginView, LogoutView, MemberCreateView, MeView, RegisterView, UserViewSet
+from apps.users.views import (
+    LoginView,
+    LogoutView,
+    MemberCreateView,
+    MeView,
+    RegisterView,
+    UserViewSet,
+)
 
 router = DefaultRouter()
 router.register(r"", UserViewSet, basename="user")
@@ -14,4 +21,3 @@ urlpatterns = [
     path("members/", MemberCreateView.as_view(), name="member-create"),
     path("", include(router.urls)),
 ]
-

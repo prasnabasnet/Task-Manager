@@ -1,11 +1,14 @@
 from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema
-from rest_framework import serializers, status, views, viewsets
+from rest_framework import status, views, viewsets
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from apps.users.serializers import (
+    LoginRequestSerializer,
+    LoginResponseSerializer,
+    LogoutResponseSerializer,
     ProfileUpdateSerializer,
     UserDetailSerializer,
     UserRegisterSerializer,
@@ -19,20 +22,6 @@ from apps.users.services import (
 )
 
 User = get_user_model()
-
-
-class LoginRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(required=True, style={"input_type": "password"})
-
-
-class LoginResponseSerializer(serializers.Serializer):
-    token = serializers.CharField()
-    user = UserDetailSerializer()
-
-
-class LogoutResponseSerializer(serializers.Serializer):
-    message = serializers.CharField()
 
 
 class RegisterView(viewsets.ModelViewSet):
@@ -55,8 +44,9 @@ class MemberCreateView(views.APIView):
 
     def post(self, request):
         new_user = CreateMemberService.execute(user=request.user, data=request.data)
-        return Response(UserDetailSerializer(new_user).data, status=status.HTTP_201_CREATED)
-
+        return Response(
+            UserDetailSerializer(new_user).data, status=status.HTTP_201_CREATED
+        )
 
 
 @extend_schema(

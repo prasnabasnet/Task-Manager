@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -327,9 +328,7 @@ UNFOLD = {
     ],
 }
 
-# -----------------------------------------------------------------------------
 # Celery Configuration
-# -----------------------------------------------------------------------------
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://127.0.0.1:6379/0")
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://127.0.0.1:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -337,28 +336,20 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 
-# -----------------------------------------------------------------------------
 # Celery Beat Schedule Configuration
-# -----------------------------------------------------------------------------
-from celery.schedules import crontab
-
 CELERY_BEAT_SCHEDULE = {
     "daily-productivity-summary": {
         "task": "apps.shared.tasks.send_daily_productivity_summary_task",
-        # "schedule": crontab(hour=0, minute=0),
-        "schedule": crontab(minute="*"),
+        "schedule": crontab(hour=0, minute=0),
+        # "schedule": crontab(minute="*"),
     },
 }
 
-# -----------------------------------------------------------------------------
 # Flower Configuration
-# -----------------------------------------------------------------------------
 CELERY_FLOWER_HOST = env("CELERY_FLOWER_HOST", default="127.0.0.1")
 CELERY_FLOWER_PORT = env.int("CELERY_FLOWER_PORT", default=5555)
 
-# -----------------------------------------------------------------------------
 # Anymail & Resend Email Configuration
-# -----------------------------------------------------------------------------
 EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
 RESEND_API_KEY = env("RESEND_API_KEY", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="onboarding@resend.dev")
