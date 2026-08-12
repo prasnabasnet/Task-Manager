@@ -8,6 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+backend/.venv
 
 *.sqlite3
 media/
@@ -15,10 +16,18 @@ staticfiles/
 
 # Local configuration secrets
 .env
+backend/.env
 
 # uv files
 .uv/
 
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.env.local
+
 # OS-specific files
 .DS_Store
 Thumbs.db
+backend_contents.txt
+frontend_contents.txt
