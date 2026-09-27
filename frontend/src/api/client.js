@@ -1,4 +1,4 @@
-const API_BASE = "https://task-manager-5ikw.onrender.com"
+const API_BASE = "https://task-manager-5ikw.onrender.com/api"
 
 export class ApiError extends Error {
   constructor(message, status, body) {
